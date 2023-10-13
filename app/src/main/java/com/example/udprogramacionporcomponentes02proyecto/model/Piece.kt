@@ -9,7 +9,7 @@ data class Piece(
     var countStep: Int,
     var state: State
 ){
-    fun toMap(): Map<String,Any>{
+    fun toMap(): HashMap<String,Any>{
         val result = HashMap<String,Any>()
         result["color"] = this.color.toString()
         result["countStep"]= this.countStep

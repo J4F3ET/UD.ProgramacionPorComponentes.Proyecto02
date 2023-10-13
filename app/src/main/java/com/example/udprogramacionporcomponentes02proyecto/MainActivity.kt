@@ -1,24 +1,21 @@
 package com.example.udprogramacionporcomponentes02proyecto
 
 import android.os.Bundle
-import android.util.Log
+import android.widget.LinearLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.udprogramacionporcomponentes02proyecto.model.Player
-import com.example.udprogramacionporcomponentes02proyecto.model.Room
 import com.example.udprogramacionporcomponentes02proyecto.ui.theme.UDProgramacionPorComponentes02ProyectoTheme
-import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
-import com.example.udprogramacionporcomponentes02proyecto.util.RealTimeManager
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
-import java.util.UUID
+import com.example.udprogramacionporcomponentes02proyecto.util.RoomCurrent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,12 +35,28 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    Column {
+        Row {
+            Box(){
+                Button(
+                    onClick ={RoomCurrent.test()},
+                    modifier = modifier
+                ){}
+            }
+        }
 
+        Row {
+            Box(){
+                Button(
+                    onClick ={RoomCurrent.test2()},
+                    modifier = modifier
+                ){}
+            }
+        }
+
+    }
+
+}
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {

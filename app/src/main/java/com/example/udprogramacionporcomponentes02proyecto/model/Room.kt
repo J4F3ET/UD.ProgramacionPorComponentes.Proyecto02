@@ -1,15 +1,15 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
 data class Room(
-    var key: String = "",
-    val players: List<Player?>,
-    val gameState: GameState
+    val key: String,
+    val players: MutableList<Player>,
+    val gameStateKey: String
 ){
-    fun toMap(): Map<String, Any> {
+    fun toMap(): HashMap<String, Any> {
         val result = HashMap<String, Any>()
         result["key"] = key
-        result["players"] = players.map { it?.toMap() }
-        result["gameState"] = gameState.toMap() // Asumiendo que GameState también tiene un método toMap
+        result["players"] = players.map{ it.toMap() }
+        result["gameStateKey"] = gameStateKey
         return result
     }
 }
