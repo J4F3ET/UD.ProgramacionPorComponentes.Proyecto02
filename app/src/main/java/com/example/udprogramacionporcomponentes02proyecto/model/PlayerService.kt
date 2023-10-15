@@ -1,18 +1,19 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
-import android.util.Log
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.State
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
-import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import java.util.UUID
 
 class PlayerService {
-    private val database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("players")
-
+    private var database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("players")
+    constructor()
+    constructor(databaseReference: DatabaseReference){
+        database = databaseReference
+    }
     fun createPlayer(name:String,color: ColorP):Player{
         val player = Player(UUID.randomUUID().toString(),name,color)
         database.child(player.uuid).setValue(player)

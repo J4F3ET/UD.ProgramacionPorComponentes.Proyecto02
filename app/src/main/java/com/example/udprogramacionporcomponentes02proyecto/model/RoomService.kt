@@ -1,6 +1,6 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
-import android.util.Log
+import com.example.udprogramacionporcomponentes02proyecto.util.RoomCurrent
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
@@ -10,12 +10,11 @@ import java.util.UUID
 class RoomService {
     private val database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("rooms")
 
-    fun createRoom(gameStateKey: String, vararg players: Player):Room{
+    fun createRoom(gameStateKey: String, vararg players: Player){
         val listPlayer = mutableListOf<Player>()
         players.forEach { listPlayer.add(it.copy())}
-        val room = Room(UUID.randomUUID().toString(),listPlayer,gameStateKey)
-        database.child(room.key).setValue(room)
-        return room
+        RoomCurrent.roomGame = Room(UUID.randomUUID().toString(),listPlayer,gameStateKey)
+        database.child(RoomCurrent.roomGame.key).setValue(RoomCurrent.roomGame)
     }
     fun findRoom(key: String, callback: (Room?) -> Unit) {
         val roomRef = database.child(key)

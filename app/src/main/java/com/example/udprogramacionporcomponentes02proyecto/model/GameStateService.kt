@@ -1,9 +1,7 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
-import android.util.Log
 import com.example.udprogramacionporcomponentes02proyecto.util.RoomCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
-import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
