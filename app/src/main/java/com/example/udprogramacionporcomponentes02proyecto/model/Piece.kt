@@ -12,7 +12,7 @@ data class Piece(
     fun toMap(): HashMap<String,Any>{
         val result = HashMap<String,Any>()
         result["color"] = this.color.toString()
-        result["countStep"]= this.countStep
+        result["countStep"] = this.countStep.toString()
         result["state"]= this.state.toString()
         return result
     }

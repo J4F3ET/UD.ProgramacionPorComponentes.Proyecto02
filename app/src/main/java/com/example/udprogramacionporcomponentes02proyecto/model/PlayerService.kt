@@ -1,18 +1,37 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
+import android.content.ContentValues
+import android.util.Log
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
+import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.State
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.UUID
 
 class PlayerService {
     private var database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("players")
-    constructor()
-    constructor(databaseReference: DatabaseReference){
-        database = databaseReference
+    val playeristener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            if (dataSnapshot.exists()) {
+                val player = convertDataSnapshotToPlayer(dataSnapshot)
+                if (player != null) {
+                    SessionCurrent.localPlayer = player
+                } else {
+                    Log.e("Error","No se pudo convertir dataSnapshot a Player")
+                }
+            }
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
+        }
+    }
+    fun getDatabaseChild(uuid:String):DatabaseReference{
+        return database.child(uuid)
     }
     fun createPlayer(name:String,color: ColorP):Player{
         val player = Player(UUID.randomUUID().toString(),name,color)

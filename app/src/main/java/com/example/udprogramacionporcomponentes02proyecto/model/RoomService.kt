@@ -1,20 +1,41 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
-import com.example.udprogramacionporcomponentes02proyecto.util.RoomCurrent
+import android.content.ContentValues
+import android.util.Log
+import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.UUID
 
 class RoomService {
     private val database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("rooms")
-
+    val RoomListener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            if (dataSnapshot.exists()) {
+                val room = convertDataSnapshotToRoom(dataSnapshot)
+                if (room != null) {
+                    SessionCurrent.roomGame = room
+                } else {
+                    Log.e("Error","No se pudo convertir dataSnapshot a room")
+                }
+            }
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
+        }
+    }
+    fun getDatabaseChild(key:String):DatabaseReference{
+        return database.child(key)
+    }
     fun createRoom(gameStateKey: String, vararg players: Player){
         val listPlayer = mutableListOf<Player>()
         players.forEach { listPlayer.add(it.copy())}
-        RoomCurrent.roomGame = Room(UUID.randomUUID().toString(),listPlayer,gameStateKey)
-        database.child(RoomCurrent.roomGame.key).setValue(RoomCurrent.roomGame)
+        SessionCurrent.roomGame = Room(UUID.randomUUID().toString(),listPlayer,gameStateKey)
+        database.child(SessionCurrent.roomGame.key).setValue(SessionCurrent.roomGame)
     }
     fun findRoom(key: String, callback: (Room?) -> Unit) {
         val roomRef = database.child(key)
