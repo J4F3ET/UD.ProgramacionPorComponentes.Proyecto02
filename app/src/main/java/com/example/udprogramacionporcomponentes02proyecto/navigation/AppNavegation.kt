@@ -9,7 +9,8 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.*
 fun AppNavigation(){
     val navController = rememberNavController()
     NavHost(navController = navController,startDestination = AppScreens.IndexScreen.router){
-        composable(route = AppScreens.PlayersSettingsScreen.router){playersSettingsScreen(navController)}
-        composable(route = AppScreens.GameScreen.router){gameScreen(navController)}
+        composable(route = AppScreens.IndexScreen.router){ IndexScreen(navController)}
+        composable(route = AppScreens.PlayersSettingsScreen.router){PlayersSettingsScreen(navController)}
+        composable(route = AppScreens.GameScreen.router){GameScreen(navController)}
     }
 }
