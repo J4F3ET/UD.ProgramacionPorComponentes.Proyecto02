@@ -26,7 +26,16 @@ fun BackgroundIndex(){
 }
 @Composable
 fun BackgroundPlayersSettings(){
-
+    Box(modifier = Modifier.fillMaxSize()){
+        Image(
+            painter =  painterResource(id = R.drawable.bg2),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .align(Alignment.Center),
+            contentScale = ContentScale.Crop
+        )
+    }
 }
 @Composable
 fun BackgroundGame(){
