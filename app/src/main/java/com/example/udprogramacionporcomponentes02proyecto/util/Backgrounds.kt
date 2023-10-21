@@ -1,5 +1,4 @@
 package com.example.udprogramacionporcomponentes02proyecto.util
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +9,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.udprogramacionporcomponentes02proyecto.R
-
 @Composable
-fun BackgroundIndex(){
+fun BackGrounds(numBg:Int){
+    val images = listOf(R.drawable.bg1,R.drawable.bg2,R.drawable.bg3)
     Box(modifier = Modifier.fillMaxSize()){
         Image(
-            painter =  painterResource(id = R.drawable.bg1),
+            painter =  painterResource(id = images[numBg]),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
@@ -23,26 +22,9 @@ fun BackgroundIndex(){
             contentScale = ContentScale.Crop
         )
     }
-}
-@Composable
-fun BackgroundPlayersSettings(){
-    Box(modifier = Modifier.fillMaxSize()){
-        Image(
-            painter =  painterResource(id = R.drawable.bg2),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .align(Alignment.Center),
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-@Composable
-fun BackgroundGame(){
-
 }
 @Preview
 @Composable
 fun previewBack(){
-    BackgroundIndex()
+    BackGrounds(1)
 }

@@ -13,10 +13,10 @@ import androidx.navigation.NavController
 import com.example.udprogramacionporcomponentes02proyecto.model.PlayerService
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.QuestionOne
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.Responses
-import com.example.udprogramacionporcomponentes02proyecto.util.BackgroundIndex
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.QuestionThree
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.QuestionTwo
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.SelectColor
+import com.example.udprogramacionporcomponentes02proyecto.util.BackGrounds
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 
@@ -25,7 +25,7 @@ import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 @Composable
 fun IndexScreen(navController: NavController){
     Scaffold{
-        BackgroundIndex()
+        BackGrounds(0)
         IndexBodyContent(navController)
     }
 }
