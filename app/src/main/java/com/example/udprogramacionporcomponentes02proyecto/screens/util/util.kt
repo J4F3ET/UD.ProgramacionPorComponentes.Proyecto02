@@ -64,11 +64,41 @@ fun TextStylePixel(): TextStyle {
         )
     )
 }
+fun TextStylePixel(color: Color,boolean: Boolean): TextStyle {
+    var shadow =if(boolean) {Shadow(
+        color = Color.White, // Color del sombreado (blanco)
+        offset = Offset(2f, 2f), // Desplazamiento del sombreado en dp
+        blurRadius = 15f // Radio de desenfoque del sombreado en dp
+    )}else{
+        Shadow(
+            color = Color.Black, // Color del sombreado (negro)
+            offset = Offset(2f, 2f), // Desplazamiento del sombreado en dp
+            blurRadius = 18f // Radio de desenfoque del sombreado en dp
+        )
+    }
+    return TextStyle(
+        color = color,
+        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 30.sp, // Cambia el tamaño del texto
+        lineHeight = 40.sp, // Ajusta la altura de línea
+        letterSpacing = 0.sp,
+        shadow = shadow
+    )
+}
 @Composable
 fun TextPixel(text:String){
     Text(
         text = text,
         modifier = Modifier.padding(0.dp,15.dp,0.dp,0.dp),
         style = TextStylePixel()
+    )
+}
+@Composable
+fun TextPixel(text:String,color: Color,boolean: Boolean){
+    Text(
+        text = text,
+        modifier = Modifier.padding(0.dp,15.dp,0.dp,0.dp),
+        style = TextStylePixel(color,boolean)
     )
 }

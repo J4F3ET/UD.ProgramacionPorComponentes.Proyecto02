@@ -23,8 +23,3 @@ fun BackGrounds(numBg:Int){
         )
     }
 }
-@Preview
-@Composable
-fun previewBack(){
-    BackGrounds(1)
-}
