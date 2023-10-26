@@ -34,7 +34,7 @@ import com.example.udprogramacionporcomponentes02proyecto.navigation.AppScreens
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.ImgSpeechBubbles
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.ImgSpeechBubblesInvert
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.TextPixel
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.TextStylePixel
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 
 
@@ -130,7 +130,7 @@ fun Responses(onNameEnteredChange:(Boolean,TextFieldValue)->Unit){
             }
             Row {
                 BasicTextField(
-                    textStyle = TextStylePixel(),
+                    textStyle = textStylePixel(),
                     modifier = Modifier
                         .width((width * 0.8).dp)
                         .height((height * 0.4).dp)

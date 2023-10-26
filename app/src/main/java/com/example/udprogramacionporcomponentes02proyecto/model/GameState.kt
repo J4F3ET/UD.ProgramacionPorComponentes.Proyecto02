@@ -1,7 +1,5 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
-import android.util.Log
-
 data class GameState(
     var uuid: String,
     var board: MutableList<BoardCell>,

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
+import com.example.udprogramacionporcomponentes02proyecto.util.RulesGame
 
 @Composable
 fun ImgSpeechBubbles(width:Int,height:Int){
@@ -33,7 +34,6 @@ fun ImgSpeechBubbles(width:Int,height:Int){
         contentScale = ContentScale.FillBounds
     )
 }
-
 @Composable
 fun ImgSpeechBubblesInvert(width: Int, height: Int) {
     Image(
@@ -48,50 +48,12 @@ fun ImgSpeechBubblesInvert(width: Int, height: Int) {
         contentScale = ContentScale.FillBounds
     )
 }
-
-fun TextStylePixel(): TextStyle {
-    return TextStyle(
-        color = Color.Black,
-        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
-        fontWeight = FontWeight.Normal,
-        fontSize = 30.sp, // Cambia el tamaño del texto
-        lineHeight = 40.sp, // Ajusta la altura de línea
-        letterSpacing = 0.sp,
-        shadow = Shadow(
-            color = Color(color = 0xFFFFFFFF), // Color del sombreado (negro)
-            offset = Offset(2f, 2f), // Desplazamiento del sombreado en dp
-            blurRadius = 15f // Radio de desenfoque del sombreado en dp
-        )
-    )
-}
-fun TextStylePixel(color: Color,boolean: Boolean): TextStyle {
-    var shadow =if(boolean) {Shadow(
-        color = Color.White, // Color del sombreado (blanco)
-        offset = Offset(2f, 2f), // Desplazamiento del sombreado en dp
-        blurRadius = 15f // Radio de desenfoque del sombreado en dp
-    )}else{
-        Shadow(
-            color = Color.Black, // Color del sombreado (negro)
-            offset = Offset(2f, 2f), // Desplazamiento del sombreado en dp
-            blurRadius = 18f // Radio de desenfoque del sombreado en dp
-        )
-    }
-    return TextStyle(
-        color = color,
-        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
-        fontWeight = FontWeight.Normal,
-        fontSize = 30.sp, // Cambia el tamaño del texto
-        lineHeight = 40.sp, // Ajusta la altura de línea
-        letterSpacing = 0.sp,
-        shadow = shadow
-    )
-}
 @Composable
 fun TextPixel(text:String){
     Text(
         text = text,
         modifier = Modifier.padding(0.dp,15.dp,0.dp,0.dp),
-        style = TextStylePixel()
+        style = textStylePixel()
     )
 }
 @Composable
@@ -99,6 +61,45 @@ fun TextPixel(text:String,color: Color,boolean: Boolean){
     Text(
         text = text,
         modifier = Modifier.padding(0.dp,15.dp,0.dp,0.dp),
-        style = TextStylePixel(color,boolean)
+        style = textStylePixel(color,if(boolean)Color.Black else Color.White,30)
     )
+}
+@Composable
+fun TextPixel(text:String, textStyle: TextStyle){
+    Text(
+        text = text,
+        modifier = Modifier.padding(0.dp,15.dp,0.dp,0.dp),
+        style = textStyle
+    )
+}
+fun shadowColor(color:Color) = Shadow(
+    color = color,
+    offset = Offset(2f, 2f), // Desplazamiento del sombreado en dp
+    blurRadius = 15f // Radio de desenfoque del sombreado en dp
+)
+fun textStylePixel(fontColor: Color, shadowColor: Color,fontSize:Int): TextStyle {
+    return TextStyle(
+        color = fontColor,
+        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
+        fontWeight = FontWeight.Normal,
+        fontSize = fontSize.sp, // Cambia el tamaño del texto
+        lineHeight = (fontSize+3).sp, // Ajusta la altura de línea
+        letterSpacing = 0.sp,
+        shadow = shadowColor(shadowColor)
+    )
+}
+fun textStylePixel(): TextStyle {
+    return TextStyle(
+        color = Color.Black,
+        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
+        fontWeight = FontWeight.Normal,
+        fontSize = 30.sp, // Cambia el tamaño del texto
+        lineHeight = 40.sp, // Ajusta la altura de línea
+        letterSpacing = 0.sp,
+        shadow = shadowColor(Color.White)
+    )
+}
+
+fun messageRule(index:Int,rules:Array<RulesGame>):Pair<String, String>{
+    return "Regla ${index+1} de ${rules.size} " to rules[index].description
 }

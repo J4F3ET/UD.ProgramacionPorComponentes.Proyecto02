@@ -16,7 +16,7 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.composables.Re
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.QuestionThree
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.QuestionTwo
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.SelectColor
-import com.example.udprogramacionporcomponentes02proyecto.util.BackGrounds
+import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 

@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.BottomBarPlayersSettingsScreen
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.ListRooms
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.TopBarPlayersSettingsScreen
-import com.example.udprogramacionporcomponentes02proyecto.util.BackGrounds
+import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,10 +28,11 @@ fun PlayersSettingsScreen(navController:NavController){
 
 @Composable
 fun PlayersSettingsScreenContent(navController:NavController){
-    ListRooms()
+    ListRooms(navController)
 }
 @Preview
 @Composable
 fun PreviewScreen(){
     PlayersSettingsScreen(navController = NavController(LocalContext.current))
 }
+

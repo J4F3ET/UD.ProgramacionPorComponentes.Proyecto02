@@ -1,6 +1,5 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
-import androidx.compose.ui.graphics.Color
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.State
 
