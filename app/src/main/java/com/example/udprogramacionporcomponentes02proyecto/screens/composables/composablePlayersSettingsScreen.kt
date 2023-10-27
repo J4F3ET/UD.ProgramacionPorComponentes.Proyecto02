@@ -1,5 +1,7 @@
 package com.example.udprogramacionporcomponentes02proyecto.screens.composables
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,8 +40,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
+import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.example.udprogramacionporcomponentes02proyecto.model.Room
 import com.example.udprogramacionporcomponentes02proyecto.model.RoomService
 import com.example.udprogramacionporcomponentes02proyecto.navigation.AppScreens
@@ -47,6 +53,10 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.TextPixel
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.messageRule
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.RulesGame
+import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,7 +114,9 @@ fun BottomBarPlayersSettingsScreen(){
 fun ListRooms(navController: NavController) {
     val rooms by RoomService().rooms
     LazyColumn(
-        modifier =  Modifier.fillMaxHeight(0.9f).fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxHeight(0.9f)
+            .fillMaxWidth(),
         contentPadding = PaddingValues(0.dp,70.dp),
         userScrollEnabled= true,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -118,19 +130,39 @@ fun ListRooms(navController: NavController) {
 }
 @Composable
 fun ItemRoom(room: Room,navController: NavController){
+    var isDialogVisible by remember { mutableStateOf(false) }
+    if (isDialogVisible) {
+        DialogWait(
+            navController,
+            room,
+            onDismiss = {
+                RoomService().removePlayerToRoom(room.key,SessionCurrent.localPlayer)
+                isDialogVisible = false
+            }
+        )
+    }
     Row(
-        Modifier
-            .border(1.dp, Color.DarkGray, RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
-            .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(Color(7,12,19), Color.Transparent, Color(7,12,19))
-                )
-            )
-            .clickable { navController.navigate(route = AppScreens.GameScreen.router) }
-            .fillMaxWidth(0.9f),
+        modifier = Modifier
+                    .border(1.dp, Color.DarkGray, RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(7, 12, 19),
+                                Color.Transparent,
+                                Color(7, 12, 19))
+                        )
+                    )
+                    .clickable{
+                        RoomService().addPlayerToRoom(room.key, SessionCurrent.localPlayer)
+                        isDialogVisible = true
+                    }
+                    .fillMaxWidth(0.9f),
         horizontalArrangement = Arrangement.Center
     ){
-        TextPixel(text = "ID: ${room.key.substring(0,5)}    JUGADORES: ${room.players.size} DE 4", textStyle = textStylePixel(Color.White,Color.Black,23))
+        TextPixel(
+            text = "ID: ${room.key.substring(0,5)}    JUGADORES: ${room.players.size} DE 4",
+            textStyle = textStylePixel(Color.White,Color.Black,23)
+        )
     }
     Spacer(modifier = Modifier.height(5.dp))
 }
@@ -164,4 +196,88 @@ fun Dialog(onDismiss: () -> Unit){
         onDismissRequest = { onDismiss() },
         containerColor = Color(7,12,19)
     )
+}
+@Composable
+fun DialogWait(navController: NavController,room: Room,onDismiss: () -> Unit){
+    var roomData by remember { mutableStateOf(room) }
+    val roomValueEventListener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            if (dataSnapshot.exists()) {
+                roomData = RoomService().convertDataSnapshotToRoom(dataSnapshot)
+                SessionCurrent.roomGame = roomData
+                if(roomData.players.size == 4){
+                    navController.navigate(route = AppScreens.GameScreen.router)
+                }
+            } else {
+                Log.e("Error", "No se pudo convertir dataSnapshot a room")
+            }
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
+        }
+    }
+    RoomService().getDatabaseChild(room.key).addValueEventListener(roomValueEventListener)
+    AlertDialogWait(roomData,navController,onDismiss)
+}
+@Composable
+fun AlertDialogWait(roomData:Room,navController: NavController,onDismiss: () -> Unit)
+{
+    AlertDialog(
+        title = {
+            TextPixel(roomData.key.substring(0,5), textStylePixel(Color.White,Color.White,30))
+        },
+        text = {
+            TextPixel(messageDialogWait(roomData), textStylePixel(Color.White,Color.DarkGray,20)
+            )
+        },
+        confirmButton = {
+            if (roomData.players.size > 1){
+                TextButton(
+                    onClick = {
+                        if (roomData.gameStateKey != "") {
+                            navController.navigate(route = AppScreens.GameScreen.router)
+                        }else{
+                            SessionCurrent.gameState = GameStateService().createGameState()
+                            SessionCurrent.roomGame.gameStateKey = SessionCurrent.gameState.uuid
+                            navController.navigate(route = AppScreens.GameScreen.router)
+                        }
+                    },
+                ) {
+                    TextPixel("Comenzar", textStylePixel(Color.White,Color.DarkGray,20))
+                }
+            } else {
+                TextButton(
+                    onClick = {
+                        onDismiss()
+                    },
+                ) {
+                    TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20))
+                }
+            }
+        },
+        onDismissRequest = { onDismiss() },
+        containerColor = Color(7,12,19)
+    )
+}
+fun messageDialogWait(room:Room):String{
+     var message = "JUGADORES: ${room.players.size} de 4\n\n"
+    message += if (room.players.size > 1){
+        "si desea iniciar la partida precione el boton 'Comenza'"
+    }else{
+        "Esperando mas jugadores para poder comenzar"
+    }+"\n\n"
+    message += if(room.gameStateKey != ""){
+        "ESTADO: Iniciado a espera que entres"
+    }else{
+        "ESTADO: Esperando"
+    }
+    return message
+}
+@Preview
+@Composable
+fun Preview(){
+    var isDialogVisible by remember { mutableStateOf(false) }
+    val list = mutableListOf<Player>()
+    val room = Room( "KEYROOM", list,"")
+    DialogWait(NavController(LocalContext.current),room) { isDialogVisible = true }
 }

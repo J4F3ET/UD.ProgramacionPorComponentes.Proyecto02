@@ -4,6 +4,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.initializationGame
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -33,7 +34,7 @@ class GameStateService {
         return database.child(uuid)
     }
     fun createGameState(): GameState{
-        val gameState = UtilGame().initializationGame(UUID.randomUUID().toString())
+        val gameState = initializationGame(UUID.randomUUID().toString())
         database.child(gameState.uuid).setValue(gameState)
         return gameState
     }

@@ -56,7 +56,6 @@ fun QuestionOne(){
         }
     }
 }
-
 @Composable
 fun QuestionTwo(name:String){
     Column(

@@ -3,16 +3,14 @@ package com.example.udprogramacionporcomponentes02proyecto.model
 import android.content.ContentValues
 import android.util.Log
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.checkPlayerColor
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
-import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import java.util.UUID
 
@@ -20,18 +18,6 @@ class RoomService {
     private val database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("rooms")
     private val _rooms =  mutableStateOf(emptyList<Room>())
     val rooms: State<List<Room>> get() = _rooms
-    val roomListener = object : ValueEventListener {
-        override fun onDataChange(dataSnapshot: DataSnapshot) {
-            if (dataSnapshot.exists()) {
-                SessionCurrent.roomGame  = convertDataSnapshotToRoom(dataSnapshot)
-            }else {
-                Log.e("Error","No se pudo convertir dataSnapshot a room")
-            }
-        }
-        override fun onCancelled(databaseError: DatabaseError) {
-            Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
-        }
-    }
     private val roomsListener = object : ValueEventListener{
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
@@ -49,9 +35,7 @@ class RoomService {
             Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
         }
     }
-    init {
-        database.addValueEventListener(roomsListener)
-    }
+    init {database.addValueEventListener(roomsListener)}
     fun getDatabaseRooms():DatabaseReference = database
     fun getDatabaseChild(key:String):DatabaseReference = database.child(key)
     fun createRoom(gameStateKey: String, vararg players: Player){
@@ -73,14 +57,38 @@ class RoomService {
             callback(null)
         }
     }
-    fun updateRoom(key:String,room:Room){
+    fun findRoomBySubKey(subKey:String):Room?{
+        return this.rooms.value.find{ room: Room -> room.key.substring(0,5) == subKey}
+    }
+    private fun updateRoom(key:String, room:Room){
         val roomMap = room.toMap()
         database.child(key).updateChildren(roomMap)
     }
+    fun addPlayerToRoom(key:String, player: Player){
+        findRoom(key){room ->
+            if (room == null) return@findRoom
+            if ( room.players.size >= 4)return@findRoom
+            if(room.players.contains(player)) return@findRoom
+
+            room.players.add(checkPlayerColor(player,room))
+            updateRoom(room.key,room)
+            SessionCurrent.roomGame = room
+        }
+    }
+    fun removePlayerToRoom(key:String, player: Player){
+        findRoom(key){room ->
+            if (room == null) return@findRoom
+            if(!room.players.contains(player)) return@findRoom
+            room.players.remove(player)
+            updateRoom(room.key,room)
+            SessionCurrent.roomGame = room
+        }
+    }
+
     fun deleteRoom(key:String){
         database.child(key).removeValue()
     }
-    public fun convertDataSnapshotToRoom(dataSnapshot: DataSnapshot): Room {
+    fun convertDataSnapshotToRoom(dataSnapshot: DataSnapshot): Room {
         val key = dataSnapshot.key.toString()
         val playersData = dataSnapshot.child("players")
         val gameStateData = dataSnapshot.child("gameStateKey").value.toString()
