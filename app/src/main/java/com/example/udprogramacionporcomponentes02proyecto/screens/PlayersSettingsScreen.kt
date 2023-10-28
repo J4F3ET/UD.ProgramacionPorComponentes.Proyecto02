@@ -30,9 +30,4 @@ fun PlayersSettingsScreen(navController:NavController){
 fun PlayersSettingsScreenContent(navController:NavController){
     ListRooms(navController)
 }
-@Preview
-@Composable
-fun PreviewScreen(){
-    PlayersSettingsScreen(navController = NavController(LocalContext.current))
-}
 

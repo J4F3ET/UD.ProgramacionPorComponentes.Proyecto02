@@ -36,7 +36,6 @@ class RoomService {
         }
     }
     init {database.addValueEventListener(roomsListener)}
-    fun getDatabaseRooms():DatabaseReference = database
     fun getDatabaseChild(key:String):DatabaseReference = database.child(key)
     fun createRoom(gameStateKey: String, vararg players: Player){
         val listPlayer = mutableListOf<Player>()
@@ -44,7 +43,7 @@ class RoomService {
         SessionCurrent.roomGame = Room(UUID.randomUUID().toString(),listPlayer,gameStateKey)
         database.child(SessionCurrent.roomGame.key).setValue(SessionCurrent.roomGame)
     }
-    fun findRoom(key: String, callback: (Room?) -> Unit) {
+    private fun findRoom(key: String, callback: (Room?) -> Unit) {
         val roomRef = database.child(key)
         roomRef.get().addOnSuccessListener { dataSnapshot ->
             if (dataSnapshot.key != null && dataSnapshot.exists()) {
@@ -56,9 +55,6 @@ class RoomService {
         }.addOnFailureListener {
             callback(null)
         }
-    }
-    fun findRoomBySubKey(subKey:String):Room?{
-        return this.rooms.value.find{ room: Room -> room.key.substring(0,5) == subKey}
     }
     private fun updateRoom(key:String, room:Room){
         val roomMap = room.toMap()
@@ -75,6 +71,14 @@ class RoomService {
             SessionCurrent.roomGame = room
         }
     }
+
+    fun addGameStateToRoom(){
+        findRoom(SessionCurrent.roomGame.key){room ->
+            if (room == null || SessionCurrent.gameState.uuid == "") return@findRoom
+            SessionCurrent.roomGame.gameStateKey = SessionCurrent.gameState.uuid
+            updateRoom(SessionCurrent.roomGame.key,SessionCurrent.roomGame)
+        }
+    }
     fun removePlayerToRoom(key:String, player: Player){
         findRoom(key){room ->
             if (room == null) return@findRoom
@@ -84,6 +88,7 @@ class RoomService {
             SessionCurrent.roomGame = room
         }
     }
+
 
     fun deleteRoom(key:String){
         database.child(key).removeValue()

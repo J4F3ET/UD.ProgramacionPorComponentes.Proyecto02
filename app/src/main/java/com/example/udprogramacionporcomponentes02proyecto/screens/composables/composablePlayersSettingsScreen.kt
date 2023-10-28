@@ -42,13 +42,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
-import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.example.udprogramacionporcomponentes02proyecto.model.Room
 import com.example.udprogramacionporcomponentes02proyecto.model.RoomService
 import com.example.udprogramacionporcomponentes02proyecto.navigation.AppScreens
@@ -123,7 +120,7 @@ fun BottomBarPlayersSettingsScreen(navController: NavController){
         ElevatedButton(
             onClick =
             {
-                RoomService().createRoom("",SessionCurrent.localPlayer);
+                RoomService().createRoom("",SessionCurrent.localPlayer)
                 isDialogWaitVisible =true
             },
             content = { TextPixel(text = "Crear", color = Color.White, boolean = true) },
@@ -261,7 +258,7 @@ fun AlertDialogWait(roomData:Room,navController: NavController,onDismiss: () -> 
                             navController.navigate(route = AppScreens.GameScreen.router)
                         }else{
                             SessionCurrent.gameState = GameStateService().createGameState()
-                            SessionCurrent.roomGame.gameStateKey = SessionCurrent.gameState.uuid
+                            RoomService().addGameStateToRoom()
                             navController.navigate(route = AppScreens.GameScreen.router)
                         }
                     },
@@ -365,8 +362,4 @@ fun messageDialogWait(room:Room):String{
         "ESTADO: Esperando"
     }
     return message
-}
-@Preview
-@Composable
-fun Preview(){
 }
