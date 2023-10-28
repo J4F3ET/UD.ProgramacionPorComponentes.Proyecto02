@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
@@ -41,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -87,14 +90,30 @@ fun TopBarPlayersSettingsScreen(){
     )
 }
 @Composable
-fun BottomBarPlayersSettingsScreen(){
+fun BottomBarPlayersSettingsScreen(navController: NavController){
+    var isDialogFindRoomVisible by remember { mutableStateOf(false) }
+    var isDialogWaitVisible by remember { mutableStateOf(false) }
+    if (isDialogFindRoomVisible) {
+        DialogFindRoom(
+            navController,
+            onDismiss = {
+                isDialogFindRoomVisible = false
+            }
+        )
+    }
+    if (isDialogWaitVisible){
+        DialogWait(navController = navController, room = SessionCurrent.roomGame) {
+            RoomService().removePlayerToRoom(SessionCurrent.roomGame.key,SessionCurrent.localPlayer)
+            isDialogWaitVisible = false
+        }
+    }
     BottomAppBar(
         containerColor = Color.Transparent/*Color(7,12,19)*/,
         tonalElevation = 10.dp,
         contentPadding = PaddingValues(10.dp,0.dp)
     ){
         ElevatedButton(
-            onClick = { /*TODO*/ },
+            onClick = {isDialogFindRoomVisible = true},
             content = { TextPixel(text = "Buscar", color = Color.White, boolean = true) },
             colors = ButtonDefaults.buttonColors(
                 Color.Transparent, Color.Black, Color.Black, Color.Black),
@@ -102,7 +121,11 @@ fun BottomBarPlayersSettingsScreen(){
         )
         Spacer(modifier = Modifier.width(10.dp))
         ElevatedButton(
-            onClick = { /*TODO*/ },
+            onClick =
+            {
+                RoomService().createRoom("",SessionCurrent.localPlayer);
+                isDialogWaitVisible =true
+            },
             content = { TextPixel(text = "Crear", color = Color.White, boolean = true) },
             colors = ButtonDefaults.buttonColors(
                 Color.Transparent, Color.Black, Color.Black, Color.Black),
@@ -143,20 +166,21 @@ fun ItemRoom(room: Room,navController: NavController){
     }
     Row(
         modifier = Modifier
-                    .border(1.dp, Color.DarkGray, RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(7, 12, 19),
-                                Color.Transparent,
-                                Color(7, 12, 19))
-                        )
+            .border(1.dp, Color.DarkGray, RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(7, 12, 19),
+                        Color.Transparent,
+                        Color(7, 12, 19)
                     )
-                    .clickable{
-                        RoomService().addPlayerToRoom(room.key, SessionCurrent.localPlayer)
-                        isDialogVisible = true
-                    }
-                    .fillMaxWidth(0.9f),
+                )
+            )
+            .clickable {
+                RoomService().addPlayerToRoom(room.key, SessionCurrent.localPlayer)
+                isDialogVisible = true
+            }
+            .fillMaxWidth(0.9f),
         horizontalArrangement = Arrangement.Center
     ){
         TextPixel(
@@ -220,8 +244,7 @@ fun DialogWait(navController: NavController,room: Room,onDismiss: () -> Unit){
     AlertDialogWait(roomData,navController,onDismiss)
 }
 @Composable
-fun AlertDialogWait(roomData:Room,navController: NavController,onDismiss: () -> Unit)
-{
+fun AlertDialogWait(roomData:Room,navController: NavController,onDismiss: () -> Unit) {
     AlertDialog(
         title = {
             TextPixel(roomData.key.substring(0,5), textStylePixel(Color.White,Color.White,30))
@@ -259,6 +282,76 @@ fun AlertDialogWait(roomData:Room,navController: NavController,onDismiss: () -> 
         containerColor = Color(7,12,19)
     )
 }
+@Composable
+fun DialogFindRoom(navController: NavController,onDismiss: () -> Unit){
+    val rooms by RoomService().rooms
+    var roomData by remember { mutableStateOf<Room?>(null) }
+    var subKeyText by remember { mutableStateOf(TextFieldValue()) }
+    var isSubKeyEntered by remember { mutableStateOf(false) }
+    var findRoomResult by remember { mutableStateOf(true) }
+    var isDialogWaitVisible by remember { mutableStateOf(false) }
+    val findRoom:(subKey:String) -> Unit= { subKey ->
+        roomData = rooms.firstOrNull { it.key.substring(0, 5) == subKey }
+        if(roomData == null) findRoomResult = false
+        isDialogWaitVisible = findRoomResult
+    }
+    if ((roomData != null) && isDialogWaitVisible) {
+        RoomService().addPlayerToRoom(roomData!!.key, SessionCurrent.localPlayer)
+        DialogWait(
+            navController,
+            roomData!!,
+            onDismiss = {
+                RoomService().removePlayerToRoom(roomData!!.key,SessionCurrent.localPlayer)
+                isDialogWaitVisible = false
+            }
+        )
+    }
+    AlertDialog(
+        title = {
+            TextPixel("Buscar sala", textStylePixel(Color.White,Color.White,30))
+        },
+        text = {
+            if(!findRoomResult){
+                TextPixel("No se encontro ninguna sala con el ID: ${subKeyText.text}", textStylePixel(Color.White, Color.Red, 20))
+            }else{
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    TextPixel("ID: ", textStylePixel(Color.White, Color.DarkGray, 20))
+                    Spacer(modifier = Modifier.width(8.dp)) // Agrega un espacio entre el texto y el campo de texto
+                    BasicTextField(
+                        textStyle = textStylePixel(),
+                        modifier = Modifier
+                            .border(1.dp, Color.White, RoundedCornerShape(0.dp, 8.dp, 0.dp, 8.dp))
+                            .weight(1f), // Utiliza "weight" para expandir el campo de texto para llenar el espacio restante
+                        value = subKeyText,
+                        onValueChange = {
+                            subKeyText = it
+                            isSubKeyEntered = it.text.isNotEmpty()
+                        },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            if(findRoomResult){
+                TextButton(
+                    onClick = { findRoom(subKeyText.text) },
+                ) {
+                    TextPixel("Buscar", textStylePixel(Color.White,Color.DarkGray,20))
+                }
+            }
+            TextButton(
+                onClick = { onDismiss() },
+            ) {
+                TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20))
+            }
+        },
+        onDismissRequest = { onDismiss() },
+        containerColor = Color(7,12,19)
+    )
+}
 fun messageDialogWait(room:Room):String{
      var message = "JUGADORES: ${room.players.size} de 4\n\n"
     message += if (room.players.size > 1){
@@ -276,8 +369,4 @@ fun messageDialogWait(room:Room):String{
 @Preview
 @Composable
 fun Preview(){
-    var isDialogVisible by remember { mutableStateOf(false) }
-    val list = mutableListOf<Player>()
-    val room = Room( "KEYROOM", list,"")
-    DialogWait(NavController(LocalContext.current),room) { isDialogVisible = true }
 }

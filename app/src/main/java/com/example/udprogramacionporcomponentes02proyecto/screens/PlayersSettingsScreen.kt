@@ -18,7 +18,7 @@ import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 fun PlayersSettingsScreen(navController:NavController){
     Scaffold(
         topBar = {TopBarPlayersSettingsScreen()},
-        bottomBar = {BottomBarPlayersSettingsScreen()},
+        bottomBar = {BottomBarPlayersSettingsScreen(navController)},
         content = {
             BackGrounds(1)
             PlayersSettingsScreenContent(navController)
