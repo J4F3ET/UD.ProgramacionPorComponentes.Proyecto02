@@ -3,7 +3,6 @@ package com.example.udprogramacionporcomponentes02proyecto.model
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.initializationGame
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -19,11 +18,8 @@ class GameStateService {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
                 val gameState = convertDataSnapshotToGameState(dataSnapshot)
-                if (gameState != null) {
-                    SessionCurrent.gameState = gameState
-                } else {
-                     Log.e("Error","No se pudo convertir dataSnapshot a gameState")
-                }
+                if (gameState != null)
+                SessionCurrent.gameState = gameState
             }
         }
         override fun onCancelled(databaseError: DatabaseError) {
@@ -35,29 +31,35 @@ class GameStateService {
     }
     fun createGameState(): GameState{
         val gameState = initializationGame(UUID.randomUUID().toString())
-        database.child(gameState.uuid).setValue(gameState)
+        database.child(gameState.key).setValue(gameState)
         return gameState
     }
     fun updateGameState(){
         val gameStateMap = SessionCurrent.gameState.toMap()
-        database.child(SessionCurrent.gameState.uuid).updateChildren(gameStateMap)
+        database.child(SessionCurrent.gameState.key).updateChildren(gameStateMap)
     }
-    fun findGameState(uuid: String, callback: (GameState?) -> Unit) {
-        database.child(uuid).get().addOnSuccessListener { dataSnapshot ->
-            if(dataSnapshot.exists())
-                callback(convertDataSnapshotToGameState(dataSnapshot))
-            else
+    private fun findGameState(key: String, callback: (GameState?) -> Unit) {
+        val gameStateRef = database.child(key)
+        gameStateRef.get().addOnSuccessListener{ dataSnapshot ->
+            if(dataSnapshot.exists()){
+                val gameState =  convertDataSnapshotToGameState(dataSnapshot)
+                callback(gameState)
+            } else{
                 callback(null)
+            }
+
         }.addOnFailureListener {
+            Log.i("ERROR","${gameStateRef.key}")
             callback(null)
         }
     }
     fun deleteGameState(uuid: String){
         database.child(uuid).removeValue()
     }
-    private fun convertDataSnapshotToGameState(dataSnapshot: DataSnapshot):GameState?{
-        val key = dataSnapshot.child("uuid").value.toString()
+    private fun convertDataSnapshotToGameState(dataSnapshot: DataSnapshot): GameState? {
+        val key = dataSnapshot.key.toString()
         val player = PlayerService().convertDataSnapshotToPlayer(dataSnapshot.child("currentPlayer"))
+            ?: return null
         val winner = dataSnapshot.child("winner").value.toString()
         val board = mutableListOf<BoardCell>()
         for(cellData in dataSnapshot.child("board").children){
@@ -66,6 +68,9 @@ class GameStateService {
                 board.add(cell)
             }
         }
-        return player?.let { GameState(key, board = board, currentPlayer = it,winner) }
+        return  GameState(key, board = board, currentPlayer = player,winner)
+    }
+    fun initializeSessionGameState(key:String,callback: (GameState?) -> Unit){
+        findGameState(key,callback)
     }
 }

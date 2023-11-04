@@ -74,8 +74,8 @@ class RoomService {
 
     fun addGameStateToRoom(){
         findRoom(SessionCurrent.roomGame.key){room ->
-            if (room == null || SessionCurrent.gameState.uuid == "") return@findRoom
-            SessionCurrent.roomGame.gameStateKey = SessionCurrent.gameState.uuid
+            if (room == null || SessionCurrent.gameState.key == "") return@findRoom
+            SessionCurrent.roomGame.gameStateKey = SessionCurrent.gameState.key
             updateRoom(SessionCurrent.roomGame.key,SessionCurrent.roomGame)
         }
     }

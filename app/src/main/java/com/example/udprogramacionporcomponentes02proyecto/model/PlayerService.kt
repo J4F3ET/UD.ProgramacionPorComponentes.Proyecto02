@@ -17,7 +17,7 @@ class PlayerService {
     private var database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("players")
     val playeristener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            if (dataSnapshot.exists()) {
+            if (dataSnapshot.exists() && dataSnapshot.child("uuid").exists()) {
                 val player = convertDataSnapshotToPlayer(dataSnapshot)
                 if (player != null) {
                     SessionCurrent.localPlayer = player

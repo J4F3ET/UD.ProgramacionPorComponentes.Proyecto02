@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.udprogramacionporcomponentes02proyecto.model.GameState
 import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
 import com.example.udprogramacionporcomponentes02proyecto.model.Room
 import com.example.udprogramacionporcomponentes02proyecto.model.RoomService
@@ -63,7 +64,7 @@ import com.google.firebase.database.ValueEventListener
 fun TopBarPlayersSettingsScreen(){
     var isDialogVisible by remember { mutableStateOf(false) }
     if (isDialogVisible) {
-        Dialog(
+        DialogRules(
             onDismiss = { isDialogVisible = false }
         )
     }
@@ -99,7 +100,7 @@ fun BottomBarPlayersSettingsScreen(navController: NavController){
         )
     }
     if (isDialogWaitVisible){
-        DialogWait(navController = navController, room = SessionCurrent.roomGame) {
+        DialogWaitGame(navController = navController, room = SessionCurrent.roomGame) {
             RoomService().removePlayerToRoom(SessionCurrent.roomGame.key,SessionCurrent.localPlayer)
             isDialogWaitVisible = false
         }
@@ -152,7 +153,7 @@ fun ListRooms(navController: NavController) {
 fun ItemRoom(room: Room,navController: NavController){
     var isDialogVisible by remember { mutableStateOf(false) }
     if (isDialogVisible) {
-        DialogWait(
+        DialogWaitGame(
             navController,
             room,
             onDismiss = {
@@ -188,7 +189,7 @@ fun ItemRoom(room: Room,navController: NavController){
     Spacer(modifier = Modifier.height(5.dp))
 }
 @Composable
-fun Dialog(onDismiss: () -> Unit){
+fun DialogRules(onDismiss: () -> Unit){
     var currentRuleIndex by remember { mutableIntStateOf(0) }
     val rulesList = RulesGame.values()
     val (dialogTitle, dialogText) = messageRule(currentRuleIndex, rulesList)
@@ -219,15 +220,25 @@ fun Dialog(onDismiss: () -> Unit){
     )
 }
 @Composable
-fun DialogWait(navController: NavController,room: Room,onDismiss: () -> Unit){
+fun DialogWaitGame(navController: NavController, room: Room, onDismiss: () -> Unit){
     var roomData by remember { mutableStateOf(room) }
+    var findGameStateResult by remember { mutableStateOf(false) }
+    val findGameState:(GameState?)-> Unit = {gameState ->
+        if(gameState !=null){
+            SessionCurrent.gameState = gameState
+            findGameStateResult = true
+        }
+    }
     val roomValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
                 roomData = RoomService().convertDataSnapshotToRoom(dataSnapshot)
                 SessionCurrent.roomGame = roomData
-                if(roomData.players.size == 4){
-                    navController.navigate(route = AppScreens.GameScreen.router)
+                if(roomData.players.size == 4 && SessionCurrent.roomGame.gameStateKey == ""){
+                    findGameState(GameStateService().createGameState())
+                    RoomService().addGameStateToRoom()
+                }else if(SessionCurrent.roomGame.gameStateKey != ""){
+                    GameStateService().initializeSessionGameState(SessionCurrent.roomGame.gameStateKey,findGameState)
                 }
             } else {
                 Log.e("Error", "No se pudo convertir dataSnapshot a room")
@@ -238,10 +249,13 @@ fun DialogWait(navController: NavController,room: Room,onDismiss: () -> Unit){
         }
     }
     RoomService().getDatabaseChild(room.key).addValueEventListener(roomValueEventListener)
-    AlertDialogWait(roomData,navController,onDismiss)
+    if(findGameStateResult){
+        navController.navigate(route = AppScreens.GameScreen.router)
+    }
+    AlertDialogWaitGame(roomData,onDismiss,findGameState)
 }
 @Composable
-fun AlertDialogWait(roomData:Room,navController: NavController,onDismiss: () -> Unit) {
+fun AlertDialogWaitGame(roomData:Room, onDismiss: () -> Unit,initializerGameState: (GameState?) ->Unit) {
     AlertDialog(
         title = {
             TextPixel(roomData.key.substring(0,5), textStylePixel(Color.White,Color.White,30))
@@ -254,13 +268,8 @@ fun AlertDialogWait(roomData:Room,navController: NavController,onDismiss: () -> 
             if (roomData.players.size > 1){
                 TextButton(
                     onClick = {
-                        if (roomData.gameStateKey != "") {
-                            navController.navigate(route = AppScreens.GameScreen.router)
-                        }else{
-                            SessionCurrent.gameState = GameStateService().createGameState()
+                            initializerGameState(GameStateService().createGameState())
                             RoomService().addGameStateToRoom()
-                            navController.navigate(route = AppScreens.GameScreen.router)
-                        }
                     },
                 ) {
                     TextPixel("Comenzar", textStylePixel(Color.White,Color.DarkGray,20))
@@ -294,7 +303,7 @@ fun DialogFindRoom(navController: NavController,onDismiss: () -> Unit){
     }
     if ((roomData != null) && isDialogWaitVisible) {
         RoomService().addPlayerToRoom(roomData!!.key, SessionCurrent.localPlayer)
-        DialogWait(
+        DialogWaitGame(
             navController,
             roomData!!,
             onDismiss = {

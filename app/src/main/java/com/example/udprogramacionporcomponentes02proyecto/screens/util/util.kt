@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
+import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.RulesGame
 
 @Composable
@@ -103,3 +104,16 @@ fun textStylePixel(): TextStyle {
 fun messageRule(index:Int,rules:Array<RulesGame>):Pair<String, String>{
     return "Regla ${index+1} de ${rules.size} " to rules[index].description
 }
+
+val mapImagePlayer = mapOf(
+    ColorP.RED to R.drawable.general_red,
+    ColorP.BLUE to R.drawable.general_blue,
+    ColorP.YELLOW to R.drawable.general_yellow,
+    ColorP.GREEN to R.drawable.general_green
+)
+val mapColorPlayer = mapOf(
+    ColorP.RED to Color.Red,
+    ColorP.BLUE to Color.Blue,
+    ColorP.YELLOW to Color.Yellow,
+    ColorP.GREEN to Color.Green
+)
