@@ -29,11 +29,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.udprogramacionporcomponentes02proyecto.R
 import com.example.udprogramacionporcomponentes02proyecto.navigation.AppScreens
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.ImgSpeechBubbles
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.ImgSpeechBubblesInvert
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.TextPixel
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.calculateFontSizeByText
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapImagePlayer
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 
@@ -45,10 +46,7 @@ fun QuestionOne(){
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(200.dp)
-                .padding(0.dp, 50.dp, 0.dp, 0.dp),
+            modifier = Modifier.fillMaxHeight().width(200.dp).padding(0.dp, 50.dp, 0.dp, 0.dp),
             contentAlignment = Alignment.TopCenter
         ){
             ImgSpeechBubbles(200,100)
@@ -70,8 +68,14 @@ fun QuestionTwo(name:String){
                 .padding(0.dp, 50.dp, 0.dp, 0.dp),
             contentAlignment = Alignment.TopCenter
         ){
-            ImgSpeechBubblesInvert(200,100)
-            TextPixel(text = "Oh... $name")
+            ImgSpeechBubblesInvert(250,100)
+            Box(modifier = Modifier.padding(15.dp,0.dp,0.dp,15.dp)){
+                TextPixel(
+                    text = "Oh... \n$name",
+                    textStyle = textStylePixel(Color.Black,Color.Transparent,
+                    fontSize = calculateFontSizeByText(name,185).toInt())
+                )
+            }
         }
     }
 }
@@ -82,10 +86,7 @@ fun QuestionThree(navController:NavController){
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(200.dp)
-                .padding(0.dp, 50.dp, 0.dp, 0.dp),
+            modifier = Modifier.fillMaxHeight().width(200.dp).padding(0.dp, 50.dp, 0.dp, 0.dp),
             contentAlignment = Alignment.TopCenter
         ){
             ImgSpeechBubbles(200,100)
@@ -106,21 +107,16 @@ fun Responses(onNameEnteredChange:(Boolean,TextFieldValue)->Unit){
     var nameText by remember { mutableStateOf(TextFieldValue()) }
     var isNameEntered by remember { mutableStateOf(false) }
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(0.dp, 50.dp, 0.dp, 0.dp),
+        modifier = Modifier.fillMaxSize().padding(0.dp, 50.dp, 0.dp, 0.dp),
         contentAlignment = Alignment.BottomCenter
     ){
         Box(contentAlignment = Alignment.Center){
             val width = 350
             val height = 200
             ImgSpeechBubbles(width,height)
-            Row(modifier = Modifier.padding(0.dp, 0.dp, 80.dp, 150.dp)
-            ){
+            Row(modifier = Modifier.padding(0.dp, 0.dp, 80.dp, 150.dp)){
                 if(isNameEntered){
-                    TextButton(
-                        onClick = { onNameEnteredChange(isNameEntered,nameText) }
-                    ) {
+                    TextButton(onClick = { onNameEnteredChange(isNameEntered,nameText) }){
                         TextPixel(text = "Siguiente ->")
                     }
                 }else{
@@ -147,24 +143,16 @@ fun Responses(onNameEnteredChange:(Boolean,TextFieldValue)->Unit){
 @Composable
 fun SelectColor(onColorEnteredChange:(Boolean, ColorP)->Unit){
     val partWidth = LocalConfiguration.current.screenWidthDp / 4
-    val images = mapOf(
-        ColorP.RED to R.drawable.general_red,
-        ColorP.BLUE to R.drawable.general_blue,
-        ColorP.YELLOW to R.drawable.general_yellow,
-        ColorP.GREEN to R.drawable.general_green
-    )
-    val selectedImage by remember { mutableStateOf(images) }
+    val selectedImage by remember { mutableStateOf(mapImagePlayer) }
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(0.dp, 50.dp, 0.dp, 0.dp),
+        modifier = Modifier.fillMaxSize().padding(0.dp, 50.dp, 0.dp, 0.dp),
         contentAlignment = Alignment.BottomCenter
     ){
         Box(contentAlignment = Alignment.Center){
             Row(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                images.forEach { image ->
+                mapImagePlayer.forEach { image ->
                     val isSelected = image == selectedImage
                     Image(
                         painter = painterResource(id = image.value),

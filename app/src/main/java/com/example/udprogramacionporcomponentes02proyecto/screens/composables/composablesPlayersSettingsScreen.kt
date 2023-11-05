@@ -63,11 +63,7 @@ import com.google.firebase.database.ValueEventListener
 @Composable
 fun TopBarPlayersSettingsScreen(){
     var isDialogVisible by remember { mutableStateOf(false) }
-    if (isDialogVisible) {
-        DialogRules(
-            onDismiss = { isDialogVisible = false }
-        )
-    }
+    if (isDialogVisible)DialogRules(onDismiss = { isDialogVisible = false })
     TopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color(7,12,19)),
         title = {
@@ -91,14 +87,7 @@ fun TopBarPlayersSettingsScreen(){
 fun BottomBarPlayersSettingsScreen(navController: NavController){
     var isDialogFindRoomVisible by remember { mutableStateOf(false) }
     var isDialogWaitVisible by remember { mutableStateOf(false) }
-    if (isDialogFindRoomVisible) {
-        DialogFindRoom(
-            navController,
-            onDismiss = {
-                isDialogFindRoomVisible = false
-            }
-        )
-    }
+    if (isDialogFindRoomVisible)DialogFindRoom(navController){isDialogFindRoomVisible = false}
     if (isDialogWaitVisible){
         DialogWaitGame(navController = navController, room = SessionCurrent.roomGame) {
             RoomService().removePlayerToRoom(SessionCurrent.roomGame.key,SessionCurrent.localPlayer)
@@ -106,7 +95,7 @@ fun BottomBarPlayersSettingsScreen(navController: NavController){
         }
     }
     BottomAppBar(
-        containerColor = Color.Transparent/*Color(7,12,19)*/,
+        containerColor = Color.Transparent,
         tonalElevation = 10.dp,
         contentPadding = PaddingValues(10.dp,0.dp)
     ){
@@ -119,8 +108,7 @@ fun BottomBarPlayersSettingsScreen(navController: NavController){
         )
         Spacer(modifier = Modifier.width(10.dp))
         ElevatedButton(
-            onClick =
-            {
+            onClick = {
                 RoomService().createRoom("",SessionCurrent.localPlayer)
                 isDialogWaitVisible =true
             },
@@ -141,27 +129,18 @@ fun ListRooms(navController: NavController) {
         contentPadding = PaddingValues(0.dp,70.dp),
         userScrollEnabled= true,
         horizontalAlignment = Alignment.CenterHorizontally
-    )  {
-        items(rooms.size) { index ->
-            if (rooms[index].players.size < 4){
-                ItemRoom(room = rooms[index],navController)
-            }
-        }
+    ){
+        items(rooms.size){if(rooms[it].players.size < 4)ItemRoom(room = rooms[it],navController)}
     }
 }
 @Composable
 fun ItemRoom(room: Room,navController: NavController){
     var isDialogVisible by remember { mutableStateOf(false) }
-    if (isDialogVisible) {
-        DialogWaitGame(
-            navController,
-            room,
-            onDismiss = {
-                RoomService().removePlayerToRoom(room.key,SessionCurrent.localPlayer)
-                isDialogVisible = false
-            }
-        )
+    val onDismiss:()->Unit={
+        RoomService().removePlayerToRoom(room.key,SessionCurrent.localPlayer)
+        isDialogVisible = false
     }
+    if (isDialogVisible)DialogWaitGame(navController,room,onDismiss)
     Row(
         modifier = Modifier
             .border(1.dp, Color.DarkGray, RoundedCornerShape(5.dp, 5.dp, 5.dp, 5.dp))
@@ -194,25 +173,19 @@ fun DialogRules(onDismiss: () -> Unit){
     val rulesList = RulesGame.values()
     val (dialogTitle, dialogText) = messageRule(currentRuleIndex, rulesList)
     AlertDialog(
-        title = {
-            TextPixel(dialogTitle, textStylePixel(Color.White,Color.White,30))
-        },
-        text = {
-            TextPixel(dialogText, textStylePixel(Color.White,Color.DarkGray,20))
-        },
+        title = {TextPixel(dialogTitle, textStylePixel(Color.White,Color.White,30))},
+        text = {TextPixel(dialogText, textStylePixel(Color.White,Color.DarkGray,20))},
         confirmButton = {
             if (currentRuleIndex < rulesList.size - 1) {
                 TextButton(
                     onClick = { currentRuleIndex++ },
-                ) {
-                    TextPixel("Siguiente", textStylePixel(Color.White,Color.DarkGray,20))
-                }
+                    content = {TextPixel("Siguiente", textStylePixel(Color.White,Color.DarkGray,20))}
+                )
             } else {
                 TextButton(
                     onClick = { onDismiss() },
-                ) {
-                    TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20))
-                }
+                    content = {TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20)) }
+                )
             }
         },
         onDismissRequest = { onDismiss() },
@@ -222,11 +195,10 @@ fun DialogRules(onDismiss: () -> Unit){
 @Composable
 fun DialogWaitGame(navController: NavController, room: Room, onDismiss: () -> Unit){
     var roomData by remember { mutableStateOf(room) }
-    var findGameStateResult by remember { mutableStateOf(false) }
     val findGameState:(GameState?)-> Unit = {gameState ->
-        if(gameState !=null){
+        if(gameState != null){
             SessionCurrent.gameState = gameState
-            findGameStateResult = true
+            navController.navigate(route = AppScreens.GameScreen.router)
         }
     }
     val roomValueEventListener = object : ValueEventListener {
@@ -237,7 +209,7 @@ fun DialogWaitGame(navController: NavController, room: Room, onDismiss: () -> Un
                 if(roomData.players.size == 4 && SessionCurrent.roomGame.gameStateKey == ""){
                     findGameState(GameStateService().createGameState())
                     RoomService().addGameStateToRoom()
-                }else if(SessionCurrent.roomGame.gameStateKey != ""){
+                }else if(SessionCurrent.roomGame.gameStateKey != "" || (SessionCurrent.roomGame.players.size == 4 && SessionCurrent.roomGame.gameStateKey != "")){
                     GameStateService().initializeSessionGameState(SessionCurrent.roomGame.gameStateKey,findGameState)
                 }
             } else {
@@ -249,21 +221,13 @@ fun DialogWaitGame(navController: NavController, room: Room, onDismiss: () -> Un
         }
     }
     RoomService().getDatabaseChild(room.key).addValueEventListener(roomValueEventListener)
-    if(findGameStateResult){
-        navController.navigate(route = AppScreens.GameScreen.router)
-    }
-    AlertDialogWaitGame(roomData,onDismiss,findGameState)
+    DialogWaitGameContent(roomData,onDismiss,findGameState)
 }
 @Composable
-fun AlertDialogWaitGame(roomData:Room, onDismiss: () -> Unit,initializerGameState: (GameState?) ->Unit) {
+fun DialogWaitGameContent(roomData:Room, onDismiss: () -> Unit,initializerGameState: (GameState?) ->Unit) {
     AlertDialog(
-        title = {
-            TextPixel(roomData.key.substring(0,5), textStylePixel(Color.White,Color.White,30))
-        },
-        text = {
-            TextPixel(messageDialogWait(roomData), textStylePixel(Color.White,Color.DarkGray,20)
-            )
-        },
+        title = {TextPixel(roomData.key.substring(0,5),textStylePixel(Color.White,Color.White,30))},
+        text = {TextPixel(messageDialogWait(roomData), textStylePixel(Color.White,Color.DarkGray,20))},
         confirmButton = {
             if (roomData.players.size > 1){
                 TextButton(
@@ -271,17 +235,13 @@ fun AlertDialogWaitGame(roomData:Room, onDismiss: () -> Unit,initializerGameStat
                             initializerGameState(GameStateService().createGameState())
                             RoomService().addGameStateToRoom()
                     },
-                ) {
-                    TextPixel("Comenzar", textStylePixel(Color.White,Color.DarkGray,20))
-                }
+                    content = {TextPixel("Comenzar", textStylePixel(Color.White,Color.DarkGray,20))}
+                )
             } else {
                 TextButton(
-                    onClick = {
-                        onDismiss()
-                    },
-                ) {
-                    TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20))
-                }
+                    onClick = {onDismiss()},
+                    content = {TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20)) }
+                )
             }
         },
         onDismissRequest = { onDismiss() },
@@ -292,8 +252,6 @@ fun AlertDialogWaitGame(roomData:Room, onDismiss: () -> Unit,initializerGameStat
 fun DialogFindRoom(navController: NavController,onDismiss: () -> Unit){
     val rooms by RoomService().rooms
     var roomData by remember { mutableStateOf<Room?>(null) }
-    var subKeyText by remember { mutableStateOf(TextFieldValue()) }
-    var isSubKeyEntered by remember { mutableStateOf(false) }
     var findRoomResult by remember { mutableStateOf(true) }
     var isDialogWaitVisible by remember { mutableStateOf(false) }
     val findRoom:(subKey:String) -> Unit= { subKey ->
@@ -312,10 +270,13 @@ fun DialogFindRoom(navController: NavController,onDismiss: () -> Unit){
             }
         )
     }
+    DialogFindRoomContent(findRoomResult, findRoom,onDismiss)
+}
+@Composable
+fun DialogFindRoomContent(findRoomResult:Boolean,findRoom:(subKey:String) -> Unit,onDismiss: () -> Unit){
+    var subKeyText by remember { mutableStateOf(TextFieldValue()) }
     AlertDialog(
-        title = {
-            TextPixel("Buscar sala", textStylePixel(Color.White,Color.White,30))
-        },
+        title = {TextPixel("Buscar sala", textStylePixel(Color.White,Color.White,30))},
         text = {
             if(!findRoomResult){
                 TextPixel("No se encontro ninguna sala con el ID: ${subKeyText.text}", textStylePixel(Color.White, Color.Red, 20))
@@ -328,14 +289,9 @@ fun DialogFindRoom(navController: NavController,onDismiss: () -> Unit){
                     Spacer(modifier = Modifier.width(8.dp)) // Agrega un espacio entre el texto y el campo de texto
                     BasicTextField(
                         textStyle = textStylePixel(),
-                        modifier = Modifier
-                            .border(1.dp, Color.White, RoundedCornerShape(0.dp, 8.dp, 0.dp, 8.dp))
-                            .weight(1f), // Utiliza "weight" para expandir el campo de texto para llenar el espacio restante
+                        modifier = Modifier.border(1.dp, Color.White, RoundedCornerShape(0.dp, 8.dp, 0.dp, 8.dp)).weight(1f),
                         value = subKeyText,
-                        onValueChange = {
-                            subKeyText = it
-                            isSubKeyEntered = it.text.isNotEmpty()
-                        },
+                        onValueChange = {subKeyText = it},
                     )
                 }
             }
@@ -344,20 +300,19 @@ fun DialogFindRoom(navController: NavController,onDismiss: () -> Unit){
             if(findRoomResult){
                 TextButton(
                     onClick = { findRoom(subKeyText.text) },
-                ) {
-                    TextPixel("Buscar", textStylePixel(Color.White,Color.DarkGray,20))
-                }
+                    content = {TextPixel("Buscar", textStylePixel(Color.White,Color.DarkGray,20)) }
+                )
             }
             TextButton(
                 onClick = { onDismiss() },
-            ) {
-                TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20))
-            }
+                content = {TextPixel("Cerrar", textStylePixel(Color.White,Color.DarkGray,20)) }
+            )
         },
         onDismissRequest = { onDismiss() },
         containerColor = Color(7,12,19)
     )
 }
+
 fun messageDialogWait(room:Room):String{
      var message = "JUGADORES: ${room.players.size} de 4\n\n"
     message += if (room.players.size > 1){

@@ -1,5 +1,9 @@
 package com.example.udprogramacionporcomponentes02proyecto.screens.util
 
+import android.content.res.Resources
+import android.graphics.Paint
+import android.graphics.Rect
+import android.util.TypedValue
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,7 +32,6 @@ fun ImgSpeechBubbles(width:Int,height:Int){
     Image(
         painter =  painterResource(id = R.drawable.speech_bubbles),
         contentDescription = null,
-        //modifier = Modifier.align(Alignment.Center),
         modifier = Modifier
             .width(width.dp)
             .height(height.dp),
@@ -104,7 +107,23 @@ fun textStylePixel(): TextStyle {
 fun messageRule(index:Int,rules:Array<RulesGame>):Pair<String, String>{
     return "Regla ${index+1} de ${rules.size} " to rules[index].description
 }
-
+fun calculateFontSizeByText(texto: String, maxWidthDp: Int): Float {
+    val density = Resources.getSystem().displayMetrics.density
+    val maxWidthPx = (maxWidthDp * density).toInt()
+    var textSize = 18f
+    val textPaint = Paint()
+    val rect = Rect()
+    textPaint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSize, Resources.getSystem().displayMetrics)
+    textPaint.getTextBounds(texto, 0, texto.length, rect)
+    var textWidth = rect.width()
+    while (textWidth > maxWidthPx) {
+        textSize -= 1f
+        textPaint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSize, Resources.getSystem().displayMetrics)
+        textPaint.getTextBounds(texto, 0, texto.length, rect)
+        textWidth = rect.width()
+    }
+    return textSize
+}
 val mapImagePlayer = mapOf(
     ColorP.RED to R.drawable.general_red,
     ColorP.BLUE to R.drawable.general_blue,
@@ -113,7 +132,7 @@ val mapImagePlayer = mapOf(
 )
 val mapColorPlayer = mapOf(
     ColorP.RED to Color.Red,
-    ColorP.BLUE to Color.Blue,
+    ColorP.BLUE to Color(0.29f, 0.463f, 0.906f, 0.8f),
     ColorP.YELLOW to Color.Yellow,
     ColorP.GREEN to Color.Green
 )

@@ -35,13 +35,8 @@ class RoomService {
             Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
         }
     }
-    init {database.addValueEventListener(roomsListener)}
-    fun getDatabaseChild(key:String):DatabaseReference = database.child(key)
-    fun createRoom(gameStateKey: String, vararg players: Player){
-        val listPlayer = mutableListOf<Player>()
-        players.forEach { listPlayer.add(it.copy())}
-        SessionCurrent.roomGame = Room(UUID.randomUUID().toString(),listPlayer,gameStateKey)
-        database.child(SessionCurrent.roomGame.key).setValue(SessionCurrent.roomGame)
+    private fun deleteRoom(key:String){
+        database.child(key).removeValue()
     }
     private fun findRoom(key: String, callback: (Room?) -> Unit) {
         val roomRef = database.child(key)
@@ -60,6 +55,14 @@ class RoomService {
         val roomMap = room.toMap()
         database.child(key).updateChildren(roomMap)
     }
+    init {database.addValueEventListener(roomsListener)}
+    fun getDatabaseChild(key:String):DatabaseReference = database.child(key)
+    fun createRoom(gameStateKey: String, vararg players: Player){
+        val listPlayer = mutableListOf<Player>()
+        players.forEach { listPlayer.add(it.copy())}
+        SessionCurrent.roomGame = Room(UUID.randomUUID().toString(),listPlayer,gameStateKey)
+        database.child(SessionCurrent.roomGame.key).setValue(SessionCurrent.roomGame)
+    }
     fun addPlayerToRoom(key:String, player: Player){
         findRoom(key){room ->
             if (room == null) return@findRoom
@@ -71,7 +74,6 @@ class RoomService {
             SessionCurrent.roomGame = room
         }
     }
-
     fun addGameStateToRoom(){
         findRoom(SessionCurrent.roomGame.key){room ->
             if (room == null || SessionCurrent.gameState.key == "") return@findRoom
@@ -84,14 +86,10 @@ class RoomService {
             if (room == null) return@findRoom
             if(!room.players.contains(player)) return@findRoom
             room.players.remove(player)
-            updateRoom(room.key,room)
+            if(room.players.size == 0 ) deleteRoom(room.key)
+            else updateRoom(room.key,room)
             SessionCurrent.roomGame = room
         }
-    }
-
-
-    fun deleteRoom(key:String){
-        database.child(key).removeValue()
     }
     fun convertDataSnapshotToRoom(dataSnapshot: DataSnapshot): Room {
         val key = dataSnapshot.key.toString()

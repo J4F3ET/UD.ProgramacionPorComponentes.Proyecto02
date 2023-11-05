@@ -5,27 +5,13 @@ import android.util.Log
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.initializationGame
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.UUID
 
 class GameStateService {
     private val database: DatabaseReference = Firebase.database("https://proyecto-1c57c-default-rtdb.firebaseio.com/").reference.child("gameStates")
-    val gameStateListener = object : ValueEventListener {
-        override fun onDataChange(dataSnapshot: DataSnapshot) {
-            if (dataSnapshot.exists()) {
-                val gameState = convertDataSnapshotToGameState(dataSnapshot)
-                if (gameState != null)
-                SessionCurrent.gameState = gameState
-            }
-        }
-        override fun onCancelled(databaseError: DatabaseError) {
-            Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
-        }
-    }
     fun getDatabaseChild(uuid:String):DatabaseReference{
         return database.child(uuid)
     }
@@ -56,11 +42,12 @@ class GameStateService {
     fun deleteGameState(uuid: String){
         database.child(uuid).removeValue()
     }
-    private fun convertDataSnapshotToGameState(dataSnapshot: DataSnapshot): GameState? {
+    fun convertDataSnapshotToGameState(dataSnapshot: DataSnapshot): GameState? {
         val key = dataSnapshot.key.toString()
         val player = PlayerService().convertDataSnapshotToPlayer(dataSnapshot.child("currentPlayer"))
             ?: return null
         val winner = dataSnapshot.child("winner").value.toString()
+        val countPair:Int = dataSnapshot.child("countPair").value.toString().toInt()
         val board = mutableListOf<BoardCell>()
         for(cellData in dataSnapshot.child("board").children){
             val cell = cellData.child("board").getValue(BoardCell::class.java)
@@ -68,7 +55,7 @@ class GameStateService {
                 board.add(cell)
             }
         }
-        return  GameState(key, board = board, currentPlayer = player,winner)
+        return  GameState(key, board = board, currentPlayer = player,countPair,winner)
     }
     fun initializeSessionGameState(key:String,callback: (GameState?) -> Unit){
         findGameState(key,callback)
