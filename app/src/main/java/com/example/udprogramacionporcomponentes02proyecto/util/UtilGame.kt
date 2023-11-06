@@ -8,7 +8,7 @@ import com.example.udprogramacionporcomponentes02proyecto.model.Room
 
 class UtilGame {
     companion object{
-        fun initializationGame(uuid:String):GameState = GameState(uuid,MutableList<BoardCell>(100){
+        fun initializationGame(uuid:String):GameState = GameState(uuid,MutableList<BoardCell>(75){
                 index -> BoardCell(index, mutableListOf()) },SessionCurrent.localPlayer)
         fun checkPlayerColor(player: Player, room: Room): Player {
             // Saca la lista de colores de los jugadores actuales de la room
@@ -31,3 +31,4 @@ class UtilGame {
     }
 
 }
+

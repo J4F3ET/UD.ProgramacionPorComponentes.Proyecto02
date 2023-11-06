@@ -8,16 +8,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.udprogramacionporcomponentes02proyecto.R
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.listImagesBackgrounds
+
 @Composable
-fun BackGrounds(numBg:Int){
-    val images = listOf(R.drawable.bg1,R.drawable.bg2,R.drawable.bg3)
+fun BackGrounds(indexBg:Int){
     Box(modifier = Modifier.fillMaxSize()){
         Image(
-            painter =  painterResource(id = images[numBg]),
+            painter =  painterResource(id = listImagesBackgrounds[indexBg]),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
                 .align(Alignment.Center),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+@Composable
+fun BackGrounds(indexBg:Int,modifier: Modifier){
+    Box(modifier = Modifier.fillMaxSize()){
+        Image(
+            painter =  painterResource(id = listImagesBackgrounds[indexBg]),
+            contentDescription = null,
+            modifier = modifier,
             contentScale = ContentScale.Crop
         )
     }

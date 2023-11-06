@@ -34,7 +34,7 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.ImgSpeech
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.ImgSpeechBubblesInvert
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.TextPixel
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.calculateFontSizeByText
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapImagePlayer
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePlayer
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 
@@ -143,7 +143,7 @@ fun Responses(onNameEnteredChange:(Boolean,TextFieldValue)->Unit){
 @Composable
 fun SelectColor(onColorEnteredChange:(Boolean, ColorP)->Unit){
     val partWidth = LocalConfiguration.current.screenWidthDp / 4
-    val selectedImage by remember { mutableStateOf(mapImagePlayer) }
+    val selectedImage by remember { mutableStateOf(mapColorImagePlayer) }
     Box(
         modifier = Modifier.fillMaxSize().padding(0.dp, 50.dp, 0.dp, 0.dp),
         contentAlignment = Alignment.BottomCenter
@@ -152,7 +152,7 @@ fun SelectColor(onColorEnteredChange:(Boolean, ColorP)->Unit){
             Row(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                mapImagePlayer.forEach { image ->
+                mapColorImagePlayer.forEach { image ->
                     val isSelected = image == selectedImage
                     Image(
                         painter = painterResource(id = image.value),

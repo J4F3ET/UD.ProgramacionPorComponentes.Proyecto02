@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
+import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.RulesGame
 
@@ -124,15 +125,56 @@ fun calculateFontSizeByText(texto: String, maxWidthDp: Int): Float {
     }
     return textSize
 }
-val mapImagePlayer = mapOf(
+fun calculateCurrentPlayer(listToPlayers:List<Player>, oldPlayer: Player, currentThrow1:Int, currentThrow2:Int): Player {
+    if(currentThrow1 == currentThrow2) return oldPlayer
+    val index = listToPlayers.indexOf(oldPlayer)
+    if (index+1 == listToPlayers.size) return listToPlayers[0]
+    return listToPlayers[index+1]
+}
+val listPositionSecureToBoard = listOf(4,11,16,21,28,33,38,45,50,55,62,67)//Celdas seguras que NO son Zona Win
+val mapColorPositionCellWin = mapOf(
+    ColorP.BLUE to 99,
+    ColorP.YELLOW to 91,
+    ColorP.RED to 75,
+    ColorP.GREEN to 83
+)
+val mapColorSecureZoneWinner = mapOf(
+    ColorP.BLUE to listOf(50,92..98),//Cell Win del BLUE es 99, 50 entrada a zona win
+    ColorP.YELLOW to listOf(33,84..90),//Cell Win del YELLOW es 91, 33 entrada a zona win
+    ColorP.RED to listOf(67..74),//Cell Win del RED es 75
+    ColorP.GREEN to listOf(16,76..82)//Cell Win del GREEN es 83, 16 entrada a zona win
+)
+val listImagesBackgrounds = listOf(
+    R.drawable.bg1,
+    R.drawable.bg2,
+    R.drawable.bg3,
+    R.drawable.general_blue,
+    R.drawable.general_yellow,
+    R.drawable.general_red,
+    R.drawable.general_green
+)
+val mapColorImagePlayer = mapOf(
     ColorP.RED to R.drawable.general_red,
     ColorP.BLUE to R.drawable.general_blue,
     ColorP.YELLOW to R.drawable.general_yellow,
     ColorP.GREEN to R.drawable.general_green
 )
 val mapColorPlayer = mapOf(
-    ColorP.RED to Color.Red,
-    ColorP.BLUE to Color(0.29f, 0.463f, 0.906f, 0.8f),
-    ColorP.YELLOW to Color.Yellow,
-    ColorP.GREEN to Color.Green
+    ColorP.RED to Color(0.694f, 0.255f, 0.224f, 1.0f),
+    ColorP.BLUE to Color(0.298f, 0.42f, 0.733f, 0.8f),
+    ColorP.YELLOW to Color(0.847f, 0.749f, 0.125f, 0.8f),
+    ColorP.GREEN to Color(0.349f, 0.62f, 0.286f, 0.8f)
+)
+
+val mapColorIndexBackground = mapOf(
+    ColorP.BLUE to 3,
+    ColorP.YELLOW to 4,
+    ColorP.RED to 5,
+    ColorP.GREEN to 6
+)
+val mapColorImagePiece = mapOf(
+    ColorP.BLUE to R.drawable.piece_blue,
+    ColorP.YELLOW to R.drawable.piece_yellow,
+    ColorP.RED to R.drawable.piece_red,
+    ColorP.GREEN to R.drawable.piece_green
 )
