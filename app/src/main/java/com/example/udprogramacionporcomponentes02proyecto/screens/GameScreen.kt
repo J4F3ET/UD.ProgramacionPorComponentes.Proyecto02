@@ -1,6 +1,5 @@
 package com.example.udprogramacionporcomponentes02proyecto.screens
 
-import android.content.ClipData.Item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,15 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,18 +22,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,16 +42,16 @@ import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.BottomBarGameScreen
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.TopBarGameScreen
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridCellJail
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.TextPixel
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridCellPieces
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridHorizontalCellsBoard
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridVerticalCellsBoard
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.listPositionSecureToBoard
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorIndexBackground
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorPlayer
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.shadowColor
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.State
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,129 +81,39 @@ fun GameScreenContent(padingValues: PaddingValues?){
         LazyVerticalGrid(
             columns = GridCells.Fixed(3), // 3 columnas\
             content = {
-                item {
-                    GridCellJail(color = ColorP.BLUE,maxWidthInDp,maxWidthInDp)
+                item {//Seccion #1X1 JAIL
+                    GridCellJail(color = ColorP.BLUE,maxWidthInDp)
                 }
-                item{
-                    GridCellsBoard(ColorP.BLUE,maxWidthInDp)
+                item{//Seccion #1X2 CELL
+                    GridVerticalCellsBoard(ColorP.BLUE,maxWidthInDp,false)
                 }
-                item {
-                    GridCellJail(color = ColorP.YELLOW,maxWidthInDp,maxWidthInDp)
+                item {//Seccion #1X3 JAIL
+                    GridCellJail(color = ColorP.YELLOW,maxWidthInDp)
                 }
-                item{
-                    GridCellsBoard(ColorP.RED,maxWidthInDp)
+                item{//Seccion #2X1 CELL
+                    GridHorizontalCellsBoard(ColorP.RED,maxWidthInDp,false)
                 }
-                item{
-                    GridCellsBoard(ColorP.RED,maxWidthInDp)
+                item{//Seccion #2X2 WIN
+                    GridCellZoneWin(ColorP.YELLOW,maxWidthInDp)
                 }
-                item{
-                    GridCellsBoard(ColorP.YELLOW,maxWidthInDp)
+                item{//Seccion #2X3 CELL
+                    GridHorizontalCellsBoard(ColorP.YELLOW,maxWidthInDp,true)
                 }
-                item {
-                    GridCellJail(color = ColorP.RED,maxWidthInDp,maxWidthInDp)
+                item {//Seccion #3X1 JAIL
+                    GridCellJail(color = ColorP.RED,maxWidthInDp)
                 }
-                item{
-                    GridCellsBoard(ColorP.GREEN,maxWidthInDp)
+                item{//Seccion #3X2 CELL
+                    GridVerticalCellsBoard(ColorP.GREEN,maxWidthInDp,true)
                 }
-                item {
-                    GridCellJail(color = ColorP.GREEN,maxWidthInDp,maxWidthInDp)
-                }
-            }
-        )
-    }
-}
-@Composable
-fun GridCellsBoard(color:ColorP,width: Dp){
-    val listBoard = MutableList<BoardCell>(100){
-            index -> BoardCell(index, mutableListOf(Piece(ColorP.BLUE,0,State.DANGER))) }
-    Box(
-        modifier = Modifier
-            .height(width)
-            .width(width),
-        contentAlignment = Alignment.Center
-    ){
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            content = {
-                items(3){
-                    ColumnVerticalCellsBoard(color = color, width = width, boardList = listBoard)
+                item {//Seccion #3X3 JAIL
+                    GridCellJail(color = ColorP.GREEN,maxWidthInDp)
                 }
             }
         )
     }
 }
 @Composable
-fun ColumnVerticalCellsBoard(color: ColorP,width: Dp,boardList: List<BoardCell>,){
-    Box(modifier = Modifier
-        .width(width)
-        .height(width)){
-        LazyColumn(
-            content = {
-                items(7) {
-                    CellBoardMov(colorCell = color, width = width.div(7), positionBoardCell =boardList[it] )
-                }
-            }
-        )
-    }
-}
-@Composable
-fun CellBoardMov(colorCell:ColorP,width: Dp,positionBoardCell: BoardCell){
-    val colorBoardCell = if(listPositionSecureToBoard.contains(positionBoardCell.position)) {
-        mapColorPlayer[colorCell]?:Color.Transparent
-    }else{
-        Color.Transparent
-    }
-    Box(
-        modifier = Modifier
-            .background(colorBoardCell, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
-            .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
-            .height(width)
-            .width(width * 7),
-        contentAlignment = Alignment.TopStart
-    ){
-        LazyHorizontalGrid(
-            modifier = Modifier.fillMaxSize(),
-            rows = GridCells.Fixed(1),
-            horizontalArrangement =  Arrangement.Center,
-            verticalArrangement = Arrangement.Center,
-            content ={
-                item{
-                    Text(
-                        text = positionBoardCell.position.toString(),
-                        color =Color.White,
-                        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
-                        fontSize = 5.sp
-                    )
-                }
-                items(positionBoardCell.pieces){piece->
-                    GridCellPieces(color = piece.color, width = width)
-                }
-            }
-        )
-    }
-}
-@Composable
-fun GridCellPieces(color: ColorP, width: Dp){
-    Box(modifier = Modifier
-        .background(Color.Transparent)
-        .height(width)
-        .width(width.div(2))
-        .padding(1.dp)){
-        Image(
-            modifier = Modifier.background(Color.Transparent),
-            painter = painterResource(mapColorImagePiece[color] ?: R.drawable.piece_blue),
-            contentDescription = "Piezas en Ceda",
-            contentScale = ContentScale.Crop,
-        )
-    }
-}
-
-@Preview
-@Composable
-fun ColumnCelsBoardPreview(){
-    val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
-    val listBoard = MutableList<BoardCell>(100){
-            index -> BoardCell(index, mutableListOf(Piece(ColorP.BLUE,0,State.DANGER))) }
+fun GridCellZoneWin(color: ColorP, maxWidthInDp: Dp){
     Box(
         modifier = Modifier
             .height(maxWidthInDp)
@@ -219,21 +121,198 @@ fun ColumnCelsBoardPreview(){
         contentAlignment = Alignment.Center
     ){
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3)
-        ){
-            item {
-                ColumnVerticalCellsBoard(ColorP.BLUE,maxWidthInDp,listBoard)
+            columns = GridCells.Fixed(3), // 3 columnas\
+            verticalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.Center,
+            content = {
+                val  width =maxWidthInDp.div(3f)
+                item {//Seccion Winer #1X1 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,3)
+                }
+                item {//Seccion #1X2 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,2)
+                }
+                item {//Seccion #1X3 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,2)
+                }
+                item {//Seccion #2X1 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,3)
+                }
+                item {//Seccion #2X2 WINNER ZONE
+                    CellWinner(colorCell = ColorP.BLUE, width,width)
+                }
+                item {//Seccion #2X3 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,1)
+                }
+                item {//Seccion Winer #3X1 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,0)
+                }
+                item {//Seccion #3X2 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,0)
+                }
+                item {//Seccion #3X3 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,1)
+                }
+
+
             }
+        )
+    }
+}
+@Composable
+fun CellsBoardInZoneWinner(color: ColorP, width: Dp,cornerIndex:Int){
+    val listRotation = listOf(
+        Pair(Pair(90f,180f),Alignment.BottomStart),
+        Pair(Pair(0f,90f),Alignment.BottomEnd),
+        Pair(Pair(270f,0f),Alignment.TopEnd),
+        Pair(Pair(180f,270f),Alignment.TopStart)
+    )
+    Box(
+        contentAlignment = listRotation[cornerIndex].second
+    ){
+        Box(
+            modifier = Modifier
+                .background(Color.Transparent)
+                .height(width)
+                .width(width.div(2))
+                .border(0.25.dp,Color.White,RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
+                .padding(1.dp),
+            contentAlignment = Alignment.Center
+        ){
+        }
+        Box(
+            modifier = Modifier
+                .background(Color.Transparent)
+                .height(width.div(2))
+                .width(width)
+                .border(0.25.dp,Color.White,RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
+                .padding(1.dp),
+            contentAlignment = Alignment.Center
+        ){
         }
     }
 }
-//@Preview
-//@Composable
-//fun PreviewCellBoardMov(){
-//    val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
-//    val positionBoardCell = BoardCell(1, mutableListOf(Piece(ColorP.BLUE,0,State.DANGER)))
-//    CellBoardMov(ColorP.BLUE,maxWidthInDp,positionBoardCell)
-//}
+@Composable
+fun CellZoneWinner(color: ColorP, area: Dp,cellIndex:Int){
+    val orientation = listOf(
+        Pair(true,Alignment.BottomCenter),// True = Row
+        Pair(false,Alignment.CenterEnd),// False = Column
+        Pair(true,Alignment.TopCenter),
+        Pair(false,Alignment.CenterStart)
+    )
+    Box(
+        modifier =Modifier.width(area).height(area),
+        contentAlignment = orientation[cellIndex].second
+    ){
+        Box(
+            modifier = Modifier
+                .background(Color.Transparent)
+                .height(if(orientation[cellIndex].first)area.div(2)else area)
+                .width(if(orientation[cellIndex].first) area else area.div(2))
+                .border(0.3.dp,Color.White,RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
+                .padding(1.dp),
+            contentAlignment = Alignment.Center
+        ){
+
+        }
+    }
+}
+@Composable
+fun CellWinner(colorCell: ColorP, width: Dp, height: Dp){
+//    val colorBoardCell = if(listPositionSecureToBoard.contains(positionBoardCell.position)) {
+//        mapColorPlayer[colorCell]?: Color.Transparent
+//    }else{
+//        Color.Transparent
+//    }
+    Box(
+        modifier = Modifier
+            .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
+            .height(height)
+            .width(width),
+        contentAlignment = Alignment.TopStart
+    ){
+//        LazyHorizontalGrid(
+//            modifier = Modifier.fillMaxSize(),
+//            rows = GridCells.Fixed(1),
+//            horizontalArrangement =  Arrangement.Center,
+//            verticalArrangement = Arrangement.Center,
+//            content ={
+//                item{
+//                    Text(
+//                        text = positionBoardCell.position.toString(),
+//                        color = Color.White,
+//                        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
+//                        fontSize = 5.sp
+//                    )
+//                }
+//                items(positionBoardCell.pieces){piece->
+//                    GridCellPieces(
+//                        color = piece.color,
+//                        width = width.div(6.9f),
+//                        height = width.div(3),
+//                        orientation = orientationCell
+//                    )
+//                }
+//            }
+//        )
+    }
+}
+@Preview
+@Composable
+fun ColumnCellsBoardPreview(){
+    val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
+    val listBoard = MutableList<BoardCell>(100){ index ->
+        BoardCell(index, mutableListOf(
+            Piece(ColorP.BLUE,0, State.DANGER),
+            Piece(ColorP.RED,0,State.DANGER)
+        )
+        )
+    }
+    Box(
+        modifier = Modifier
+            .height(maxWidthInDp)
+            .width(maxWidthInDp),
+        contentAlignment = Alignment.Center
+    ){
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3), // 3 columnas\
+            verticalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.Center,
+            content = {
+                val  width =maxWidthInDp.div(3f)
+                item {//Seccion Winer #1X1 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,3)
+                }
+                item {//Seccion #1X2 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,2)
+                }
+                item {//Seccion #1X3 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,2)
+                }
+                item {//Seccion #2X1 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,3)
+                }
+                item {//Seccion #2X2 WINNER ZONE
+                    CellWinner(colorCell = ColorP.BLUE, width,width)
+                }
+                item {//Seccion #2X3 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,1)
+                }
+                item {//Seccion Winer #3X1 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,0)
+                }
+                item {//Seccion #3X2 CELL SECURE
+                    CellZoneWinner(color = ColorP.BLUE, width,0)
+                }
+                item {//Seccion #3X3 CELLS
+                    CellsBoardInZoneWinner(color = ColorP.BLUE, width,1)
+                }
+
+
+            }
+        )
+    }
+}
 @Preview
 @Composable
 fun GameScreenContentPreview(){

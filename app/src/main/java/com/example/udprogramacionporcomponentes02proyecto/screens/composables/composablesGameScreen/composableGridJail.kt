@@ -27,11 +27,11 @@ import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 
 @Composable
-fun GridCellPiecesJail(color: ColorP, with: Dp){
+fun GridCellPiecesJail(color: ColorP, width: Dp){
     Box(modifier = Modifier
         .background(Color.Transparent)
-        .height(with.div(4))
-        .width(with.div(5))
+        .height(width.div(4))
+        .width(width.div(5))
         .padding(1.dp)){
         Image(
             modifier = Modifier.background(Color.Transparent),
@@ -42,20 +42,19 @@ fun GridCellPiecesJail(color: ColorP, with: Dp){
     }
 }
 @Composable
-fun GridCellJail(color: ColorP, with: Dp, height: Dp){
+fun GridCellJail(color: ColorP, width: Dp){
     Box(
         modifier = Modifier
-            .border(1.dp, Color.Black, RoundedCornerShape(0.dp, 8.dp, 0.dp, 8.dp))
+            .border(1.dp, Color.Black, RoundedCornerShape(1.dp, 1.dp, 1.dp, 1.dp))
             .fillMaxSize()
-            .height(height)
-            .width(with),
+            .height(width)
+            .width(width),
         contentAlignment = Alignment.Center
     ){
         BackGrounds(
             indexBg = mapColorIndexBackground[color]?:3,
             modifier = Modifier
                 .align(Alignment.Center)
-                .border(1.dp, Color.Transparent, RoundedCornerShape(0.dp, 8.dp, 0.dp, 8.dp))
                 .blur(13.dp)
         )
         Box(
@@ -67,7 +66,7 @@ fun GridCellJail(color: ColorP, with: Dp, height: Dp){
                 columns = GridCells.Fixed(2),
                 content = {
                     items(4){
-                        GridCellPiecesJail(color,with)
+                        GridCellPiecesJail(color,width)
                     }
                 }
             )
