@@ -66,6 +66,8 @@ fun GridVerticalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
 }
 @Composable
 fun GridHorizontalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
+
+    //AQUI PUEDE IR EL ESCUCHA DE LA BOARD
     val listBoard = MutableList<BoardCell>(100){
             index -> BoardCell(index, mutableListOf(Piece(ColorP.BLUE,0, State.DANGER))) }
     Box(
@@ -76,6 +78,8 @@ fun GridHorizontalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
     ){
         LazyHorizontalGrid(
             rows = GridCells.Fixed(3),
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceAround,
             content = {
                 items(3){
                     RowHorizontalCellsBoard(
@@ -93,7 +97,8 @@ fun GridHorizontalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
 fun RowHorizontalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>, directionInvert:Boolean){
     val orientationCell = if(directionInvert)"x" else "-x"
     Box(modifier = Modifier
-        .width(width)
+        .fillMaxSize()
+        .width(width.times(1.08f))
         .height(width)){
         LazyRow(
             reverseLayout = directionInvert,
@@ -101,7 +106,7 @@ fun RowHorizontalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>
                 items(7) {
                     CellBoardVerticalMov(
                         colorCell = color,
-                        width = width.div(7),
+                        width = width.times(0.154f),//El valor sale del pierde de valores, de 1.08 osea un 8% y del divido en 7, la cantidad de celdas 1.08/7 = 0.154...
                         height = width,
                         orientationCell = orientationCell,
                         positionBoardCell =boardList[it]
@@ -113,7 +118,7 @@ fun RowHorizontalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>
 }
 @Composable
 fun ColumnVerticalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>, directionInvert:Boolean){
-    val orientationCell = if(directionInvert)"-y" else "y"
+    val orientationCell = if(directionInvert)"y" else "-y"
     Box(modifier = Modifier
         .width(width)
         .height(width)){
@@ -164,7 +169,7 @@ fun CellBoardHorizontalMov(colorCell: ColorP, width: Dp, height: Dp, orientation
                 items(positionBoardCell.pieces){piece->
                     GridCellPieces(
                         color = piece.color,
-                        width = width.div(6.9f),
+                        width = width.div(7f),
                         height = width.div(3),
                         orientation = orientationCell
                     )
