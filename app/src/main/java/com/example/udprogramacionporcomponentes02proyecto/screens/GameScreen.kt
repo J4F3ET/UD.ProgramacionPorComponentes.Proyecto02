@@ -45,12 +45,12 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.composables.co
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridCellPieces
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridHorizontalCellsBoard
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridVerticalCellsBoard
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.listPositionSecureToBoard
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorPlayer
 import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.State
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.createNestedListToBoardCell
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,6 +74,9 @@ fun GameScreen(navController:NavController){
 
 @Composable
 fun GameScreenContent(padingValues: PaddingValues?){
+    //AQUI VA EL LISTENER DE LA BOARD
+    val listBoard = MutableList<BoardCell>(100){
+            index -> BoardCell(index, mutableListOf(/*Piece(ColorP.BLUE,0, State.DANGER)*/)) }
     val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
     Box(
         contentAlignment = Alignment.Center
@@ -85,25 +88,25 @@ fun GameScreenContent(padingValues: PaddingValues?){
                     GridCellJail(color = ColorP.BLUE,maxWidthInDp)
                 }
                 item{//Seccion #1X2 CELL
-                    GridVerticalCellsBoard(ColorP.BLUE,maxWidthInDp,false)
+                    GridVerticalCellsBoard(createNestedListToBoardCell("1x2",listBoard),maxWidthInDp,false)
                 }
                 item {//Seccion #1X3 JAIL
                     GridCellJail(color = ColorP.YELLOW,maxWidthInDp)
                 }
                 item{//Seccion #2X1 CELL
-                    GridHorizontalCellsBoard(ColorP.RED,maxWidthInDp,false)
+                    GridHorizontalCellsBoard(createNestedListToBoardCell("2x1",listBoard),maxWidthInDp,false)
                 }
                 item{//Seccion #2X2 WIN
                     GridCellZoneWin(ColorP.YELLOW,maxWidthInDp)
                 }
                 item{//Seccion #2X3 CELL
-                    GridHorizontalCellsBoard(ColorP.YELLOW,maxWidthInDp,true)
+                    GridHorizontalCellsBoard(createNestedListToBoardCell("2x3",listBoard),maxWidthInDp,true)
                 }
                 item {//Seccion #3X1 JAIL
                     GridCellJail(color = ColorP.RED,maxWidthInDp)
                 }
                 item{//Seccion #3X2 CELL
-                    GridVerticalCellsBoard(ColorP.GREEN,maxWidthInDp,true)
+                    GridVerticalCellsBoard(createNestedListToBoardCell("3x2",listBoard),maxWidthInDp,true)
                 }
                 item {//Seccion #3X3 JAIL
                     GridCellJail(color = ColorP.GREEN,maxWidthInDp)
@@ -173,8 +176,7 @@ fun CellsBoardInZoneWinner(width: Dp,cornerIndex:Int){
                 .background(Color.Transparent)
                 .height(width)
                 .width(width.div(2))
-                .border(0.25.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
-                .padding(1.dp),
+                .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp)),
             contentAlignment = Alignment.Center
         ){
         }
@@ -182,9 +184,8 @@ fun CellsBoardInZoneWinner(width: Dp,cornerIndex:Int){
             modifier = Modifier
                 .background(Color.Transparent)
                 .height(width.div(2))
-                .width(width)
-                .border(0.25.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
-                .padding(1.dp),
+                .width(width.times(1.4f))
+                .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp)),
             contentAlignment = Alignment.Center
         ){
         }
@@ -200,6 +201,7 @@ fun CellZoneWinner(area: Dp,cellIndex:Int){
     )
     Box(
         modifier = Modifier
+            .fillMaxSize()
             .width(area)
             .height(area),
         contentAlignment = orientation[cellIndex].second
@@ -208,9 +210,8 @@ fun CellZoneWinner(area: Dp,cellIndex:Int){
             modifier = Modifier
                 .background(Color.Transparent)
                 .height(if (orientation[cellIndex].first) area.div(2) else area)
-                .width(if (orientation[cellIndex].first) area else area.div(2))
-                .border(0.3.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
-                .padding(1.dp),
+                .width(if (orientation[cellIndex].first) area.times(1.3f) else area.div(2))
+                .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp)),
             contentAlignment = Alignment.Center
         ){
 
@@ -231,7 +232,7 @@ fun CellWinner(area: Dp){
             .width(area),
         contentAlignment = Alignment.TopStart
     ){
-        Box(modifier = Modifier.fillMaxSize(1f)){
+        Box(modifier = Modifier.fillMaxSize()){
             Image(
                 painter = painterResource(id = R.drawable.portal),
                 contentDescription = "background winner zone",

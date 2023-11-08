@@ -131,19 +131,14 @@ fun calculateCurrentPlayer(listToPlayers:List<Player>, oldPlayer: Player, curren
     if (index+1 == listToPlayers.size) return listToPlayers[0]
     return listToPlayers[index+1]
 }
-val listPositionSecureToBoard = listOf(4,11,16,21,28,33,38,45,50,55,62,67)//Celdas seguras que NO son Zona Win
-val mapColorPositionCellWin = mapOf(
-    ColorP.BLUE to 99,
-    ColorP.YELLOW to 91,
-    ColorP.RED to 75,
-    ColorP.GREEN to 83
+val mapColorSecureZone = mapOf(
+    ColorP.BLUE to (92..99).toList() + listOf(55),
+    ColorP.YELLOW to (84..91).toList() + listOf(38),
+    ColorP.RED to (68..75).toList() + listOf(4),
+    ColorP.GREEN to (76..83).toList() + listOf(21),
+    ColorP.NEUTRAL to listOf(11, 16, 28, 33, 45, 50, 62, 67)
 )
-val mapColorSecureZoneWinner = mapOf(
-    ColorP.BLUE to listOf(50,92..98),//Cell Win del BLUE es 99, 50 entrada a zona win
-    ColorP.YELLOW to listOf(33,84..90),//Cell Win del YELLOW es 91, 33 entrada a zona win
-    ColorP.RED to listOf(67..74),//Cell Win del RED es 75
-    ColorP.GREEN to listOf(16,76..82)//Cell Win del GREEN es 83, 16 entrada a zona win
-)
+
 val listImagesBackgrounds = listOf(
     R.drawable.bg1,
     R.drawable.bg2,
@@ -163,7 +158,8 @@ val mapColorPlayer = mapOf(
     ColorP.RED to Color(0.694f, 0.255f, 0.224f, 1.0f),
     ColorP.BLUE to Color(0.298f, 0.42f, 0.733f, 0.8f),
     ColorP.YELLOW to Color(0.847f, 0.749f, 0.125f, 0.8f),
-    ColorP.GREEN to Color(0.349f, 0.62f, 0.286f, 0.8f)
+    ColorP.GREEN to Color(0.349f, 0.62f, 0.286f, 0.8f),
+    ColorP.NEUTRAL to Color(0.337f, 0.345f, 0.369f, 0.8f)
 )
 
 val mapColorIndexBackground = mapOf(

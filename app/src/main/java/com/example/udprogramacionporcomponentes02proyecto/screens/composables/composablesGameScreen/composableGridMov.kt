@@ -33,16 +33,13 @@ import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
 import com.example.udprogramacionporcomponentes02proyecto.model.Piece
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.listPositionSecureToBoard
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorPlayer
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.State
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.colorCell
 
 @Composable
-fun GridVerticalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
-    val listBoard = MutableList<BoardCell>(100){
-            index -> BoardCell(index, mutableListOf(Piece(ColorP.BLUE,0, State.DANGER))) }
+fun GridVerticalCellsBoard(listColumns:List<List<BoardCell>>, width: Dp, directionInvert:Boolean){
     Box(
         modifier = Modifier
             .height(width)
@@ -54,9 +51,8 @@ fun GridVerticalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
             content = {
                 items(3){
                     ColumnVerticalCellsBoard(
-                        color = color,
                         width = width,
-                        boardList = listBoard,
+                        boardList = listColumns[it],
                         directionInvert = directionInvert
                     )
                 }
@@ -65,11 +61,7 @@ fun GridVerticalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
     }
 }
 @Composable
-fun GridHorizontalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
-
-    //AQUI PUEDE IR EL ESCUCHA DE LA BOARD
-    val listBoard = MutableList<BoardCell>(100){
-            index -> BoardCell(index, mutableListOf(Piece(ColorP.BLUE,0, State.DANGER))) }
+fun GridHorizontalCellsBoard(listRows:List<List<BoardCell>>, width: Dp, directionInvert:Boolean){
     Box(
         modifier = Modifier
             .height(width)
@@ -83,9 +75,8 @@ fun GridHorizontalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
             content = {
                 items(3){
                     RowHorizontalCellsBoard(
-                        color = color,
                         width = width,
-                        boardList = listBoard,
+                        boardList = listRows[it],
                         directionInvert = directionInvert
                     )
                 }
@@ -94,8 +85,8 @@ fun GridHorizontalCellsBoard(color: ColorP, width: Dp, directionInvert:Boolean){
     }
 }
 @Composable
-fun RowHorizontalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>, directionInvert:Boolean){
-    val orientationCell = if(directionInvert)"x" else "-x"
+fun RowHorizontalCellsBoard(width: Dp, boardList: List<BoardCell>, directionInvert:Boolean){
+    val orientationCell = if(directionInvert)"-x" else "x"
     Box(modifier = Modifier
         .fillMaxSize()
         .width(width.times(1.08f))
@@ -105,8 +96,7 @@ fun RowHorizontalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>
             content = {
                 items(7) {
                     CellBoardVerticalMov(
-                        colorCell = color,
-                        width = width.times(0.154f),//El valor sale del pierde de valores, de 1.08 osea un 8% y del divido en 7, la cantidad de celdas 1.08/7 = 0.154...
+                        width = width.times(0.155f),//El valor sale del pierde de valores, de 1.08 osea un 8% y del divido en 7, la cantidad de celdas 1.08/7 = 0.154...
                         height = width,
                         orientationCell = orientationCell,
                         positionBoardCell =boardList[it]
@@ -117,7 +107,7 @@ fun RowHorizontalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>
     }
 }
 @Composable
-fun ColumnVerticalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell>, directionInvert:Boolean){
+fun ColumnVerticalCellsBoard(width: Dp, boardList: List<BoardCell>, directionInvert:Boolean){
     val orientationCell = if(directionInvert)"y" else "-y"
     Box(modifier = Modifier
         .width(width)
@@ -127,7 +117,6 @@ fun ColumnVerticalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell
             content = {
                 items(7) {
                     CellBoardHorizontalMov(
-                        colorCell = color,
                         width = width,
                         height =  width.div(7),
                         orientationCell = orientationCell,
@@ -138,12 +127,8 @@ fun ColumnVerticalCellsBoard(color: ColorP, width: Dp, boardList: List<BoardCell
     }
 }
 @Composable
-fun CellBoardHorizontalMov(colorCell: ColorP, width: Dp, height: Dp, orientationCell:String, positionBoardCell: BoardCell){
-    val colorBoardCell = if(listPositionSecureToBoard.contains(positionBoardCell.position)) {
-        mapColorPlayer[colorCell]?: Color.Transparent
-    }else{
-        Color.Transparent
-    }
+fun CellBoardHorizontalMov(width: Dp, height: Dp, orientationCell:String, positionBoardCell: BoardCell){
+    val colorBoardCell = colorCell(positionBoardCell.position)
     Box(
         modifier = Modifier
             .background(colorBoardCell, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
@@ -158,13 +143,15 @@ fun CellBoardHorizontalMov(colorCell: ColorP, width: Dp, height: Dp, orientation
             horizontalArrangement =  Arrangement.Center,
             verticalArrangement = Arrangement.Center,
             content ={
-                item{
-                    Text(
-                        text = positionBoardCell.position.toString(),
-                        color = Color.White,
-                        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
-                        fontSize = 5.sp
-                    )
+                if (positionBoardCell.position < 68 ){
+                    item{
+                        Text(
+                            text = positionBoardCell.position.toString(),
+                            color = Color.White,
+                            fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
+                            fontSize = 5.sp
+                        )
+                    }
                 }
                 items(positionBoardCell.pieces){piece->
                     GridCellPieces(
@@ -179,16 +166,12 @@ fun CellBoardHorizontalMov(colorCell: ColorP, width: Dp, height: Dp, orientation
     }
 }
 @Composable
-fun CellBoardVerticalMov(colorCell: ColorP, width: Dp, height: Dp, orientationCell:String, positionBoardCell: BoardCell){
-    val colorBoardCell = if(listPositionSecureToBoard.contains(positionBoardCell.position)) {
-        mapColorPlayer[colorCell]?: Color.Transparent
-    }else{
-        Color.Transparent
-    }
+fun CellBoardVerticalMov(width: Dp, height: Dp, orientationCell:String, positionBoardCell: BoardCell){
+    val colorBoardCell = colorCell(positionBoardCell.position)
     Box(
         modifier = Modifier
             .background(colorBoardCell, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
-            .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
+            .border(0.55.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp))
             .height(height)
             .width(width),
         contentAlignment = Alignment.TopStart
@@ -198,13 +181,15 @@ fun CellBoardVerticalMov(colorCell: ColorP, width: Dp, height: Dp, orientationCe
             horizontalAlignment =  Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             content ={
-                item{
-                    Text(
-                        text = positionBoardCell.position.toString(),
-                        color = Color.White,
-                        fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
-                        fontSize = 5.sp
-                    )
+                if(positionBoardCell.position < 68){
+                    item{
+                        Text(
+                            text = positionBoardCell.position.toString(),
+                            color = Color.White,
+                            fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
+                            fontSize = 5.sp
+                        )
+                    }
                 }
                 items(positionBoardCell.pieces.size){indexPiece->
                     GridCellPieces(
