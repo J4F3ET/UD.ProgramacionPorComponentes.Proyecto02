@@ -41,6 +41,8 @@ import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
 import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.BottomBarGameScreen
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.TopBarGameScreen
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.CellBoardHorizontalMov
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.CellBoardVerticalMov
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridCellJail
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridCellPieces
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridHorizontalCellsBoard
@@ -75,6 +77,7 @@ fun GameScreen(navController:NavController){
 @Composable
 fun GameScreenContent(padingValues: PaddingValues?){
     //AQUI VA EL LISTENER DE LA BOARD
+
     val listBoard = MutableList<BoardCell>(100){
             index -> BoardCell(index, mutableListOf(/*Piece(ColorP.BLUE,0, State.DANGER)*/)) }
     val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
@@ -97,7 +100,7 @@ fun GameScreenContent(padingValues: PaddingValues?){
                     GridHorizontalCellsBoard(createNestedListToBoardCell("2x1",listBoard),maxWidthInDp,false)
                 }
                 item{//Seccion #2X2 WIN
-                    GridCellZoneWin(ColorP.YELLOW,maxWidthInDp)
+                    GridCellZoneWin(listBoard,maxWidthInDp)
                 }
                 item{//Seccion #2X3 CELL
                     GridHorizontalCellsBoard(createNestedListToBoardCell("2x3",listBoard),maxWidthInDp,true)
@@ -116,7 +119,7 @@ fun GameScreenContent(padingValues: PaddingValues?){
     }
 }
 @Composable
-fun GridCellZoneWin(color: ColorP, maxWidthInDp: Dp){
+fun GridCellZoneWin(board:List<BoardCell>,maxWidthInDp: Dp){
     Box(
         modifier = Modifier
             .height(maxWidthInDp)
@@ -130,48 +133,49 @@ fun GridCellZoneWin(color: ColorP, maxWidthInDp: Dp){
             content = {
                 val  width =maxWidthInDp.div(3f)
                 item {//Seccion Winer #1X1 CELLS
-                    CellsBoardInZoneWinner(width,3)
+                    CellsBoardInZoneWinner(width,Pair(board[59],board[58]))
                 }
                 item {//Seccion #1X2 CELL SECURE
-                    CellZoneWinner( width,2)
+                    CellZoneWinner( width,board[98])
                 }
                 item {//Seccion #1X3 CELLS
-                    CellsBoardInZoneWinner(width,2)
+                    CellsBoardInZoneWinner(width,Pair(board[41],board[42]))
                 }
                 item {//Seccion #2X1 CELL SECURE
-                    CellZoneWinner(width,3)
+                    CellZoneWinner(width,board[74])
                 }
                 item {//Seccion #2X2 WINNER ZONE
                     CellWinner(width)
                 }
                 item {//Seccion #2X3 CELL SECURE
-                    CellZoneWinner( width,1)
+                    CellZoneWinner( width,board[90])
                 }
                 item {//Seccion Winer #3X1 CELLS
-                    CellsBoardInZoneWinner(width,0)
+                    CellsBoardInZoneWinner(width,Pair(board[7],board[8]))
                 }
                 item {//Seccion #3X2 CELL SECURE
-                    CellZoneWinner( width,0)
+                    CellZoneWinner( width,board[82])
                 }
                 item {//Seccion #3X3 CELLS
-                    CellsBoardInZoneWinner(width,1)
+                    CellsBoardInZoneWinner(width,Pair(board[25],board[24]))
                 }
             }
         )
     }
 }
 @Composable
-fun CellsBoardInZoneWinner(width: Dp,cornerIndex:Int){
-    val listRotation = listOf(
-        Pair(Pair(90f,180f),Alignment.BottomStart),
-        Pair(Pair(0f,90f),Alignment.BottomEnd),
-        Pair(Pair(270f,0f),Alignment.TopEnd),
-        Pair(Pair(180f,270f),Alignment.TopStart)
-    )
+fun CellsBoardInZoneWinner(width: Dp,cells:Pair<BoardCell,BoardCell>){
+    val configurationCells = when(cells.first.position){
+        59 -> Pair(Pair("x","-y"),Alignment.TopStart)
+        41 -> Pair(Pair("-x","-y"),Alignment.TopEnd)
+        7 -> Pair(Pair("x","y"),Alignment.BottomStart)
+        25 -> Pair(Pair("-x","y"),Alignment.BottomEnd)
+        else -> Pair(Pair("x","y"),Alignment.BottomStart)
+    }
     Box(
-        contentAlignment = listRotation[cornerIndex].second
+        contentAlignment = configurationCells.second
     ){
-        Box(
+        Box(//Fist es la Columna y Second es la Row, se renderiza primero la columna y luego la fila
             modifier = Modifier
                 .background(Color.Transparent)
                 .height(width)
@@ -179,6 +183,7 @@ fun CellsBoardInZoneWinner(width: Dp,cornerIndex:Int){
                 .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp)),
             contentAlignment = Alignment.Center
         ){
+            CellBoardVerticalMov(width.div(2),width,configurationCells.first.first,cells.first)
         }
         Box(
             modifier = Modifier
@@ -188,33 +193,45 @@ fun CellsBoardInZoneWinner(width: Dp,cornerIndex:Int){
                 .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp)),
             contentAlignment = Alignment.Center
         ){
+            CellBoardHorizontalMov(width.times(1.4f),width.div(2),configurationCells.first.second,cells.second)
         }
     }
 }
 @Composable
-fun CellZoneWinner(area: Dp,cellIndex:Int){
-    val orientation = listOf(
-        Pair(true,Alignment.BottomCenter),// True = Row
-        Pair(false,Alignment.CenterEnd),// False = Column
-        Pair(true,Alignment.TopCenter),
-        Pair(false,Alignment.CenterStart)
+fun CellZoneWinner(area: Dp,cell: BoardCell){
+    val mapOrientation = mapOf(
+        82 to Pair(true,Alignment.BottomCenter),// True = Row
+        90 to Pair(false,Alignment.CenterEnd),// False = Column
+        98 to Pair(true,Alignment.TopCenter),
+        74 to Pair(false,Alignment.CenterStart)
     )
+    val width = if(mapOrientation[cell.position]?.first == true) area.times(1.3f) else area.div(2)
+    val height = if(mapOrientation[cell.position]?.first == true) area.div(2) else area
+    val orientationCell = when(cell.position){
+        90 -> "-x"
+        98 -> "-y"
+        74 -> "x"
+        else -> "y"
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .width(area)
             .height(area),
-        contentAlignment = orientation[cellIndex].second
+        contentAlignment = mapOrientation[cell.position]?.second ?: Alignment.Center
     ){
         Box(
             modifier = Modifier
                 .background(Color.Transparent)
-                .height(if (orientation[cellIndex].first) area.div(2) else area)
-                .width(if (orientation[cellIndex].first) area.times(1.3f) else area.div(2))
+                .height(height)
+                .width(width)
                 .border(0.5.dp, Color.White, RoundedCornerShape(2.dp, 2.dp, 2.dp, 2.dp)),
             contentAlignment = Alignment.Center
         ){
-
+            if(mapOrientation[cell.position]?.first == true)
+                CellBoardHorizontalMov(width,height,orientationCell,cell)
+            else
+                CellBoardVerticalMov(width,height,orientationCell,cell)
         }
     }
 }
@@ -269,7 +286,9 @@ fun CellWinner(area: Dp){
 @Composable
 fun ColumnCellsBoardPreview(){
     val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
-    GridCellZoneWin(ColorP.BLUE,maxWidthInDp)
+    val listBoard = MutableList<BoardCell>(100){
+            index -> BoardCell(index, mutableListOf(Piece(ColorP.BLUE,0, State.DANGER))) }
+    GridCellZoneWin(listBoard,maxWidthInDp)
 }
 @Preview
 @Composable
