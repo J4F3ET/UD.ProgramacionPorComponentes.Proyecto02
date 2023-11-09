@@ -155,7 +155,7 @@ val mapColorImagePlayer = mapOf(
     ColorP.GREEN to R.drawable.general_green
 )
 val mapColorPlayer = mapOf(
-    ColorP.RED to Color(0.694f, 0.255f, 0.224f, 1.0f),
+    ColorP.RED to Color(0.694f, 0.255f, 0.224f, 0.796f),
     ColorP.BLUE to Color(0.298f, 0.42f, 0.733f, 0.8f),
     ColorP.YELLOW to Color(0.847f, 0.749f, 0.125f, 0.8f),
     ColorP.GREEN to Color(0.349f, 0.62f, 0.286f, 0.8f),
@@ -174,3 +174,5 @@ val mapColorImagePiece = mapOf(
     ColorP.RED to R.drawable.piece_red,
     ColorP.GREEN to R.drawable.piece_green
 )
+
+val Numbers = false

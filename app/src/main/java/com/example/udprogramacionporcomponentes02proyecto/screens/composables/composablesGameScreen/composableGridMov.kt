@@ -24,18 +24,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
-import com.example.udprogramacionporcomponentes02proyecto.model.Piece
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.Numbers
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
-import com.example.udprogramacionporcomponentes02proyecto.util.State
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.colorCell
 
 @Composable
@@ -143,20 +139,19 @@ fun CellBoardHorizontalMov(width: Dp, height: Dp, orientationCell:String, positi
             horizontalArrangement =  Arrangement.Center,
             verticalArrangement = Arrangement.Center,
             content ={
-                if (positionBoardCell.position < 68 ){
+                if (Numbers){
                     item{
                         Text(
                             text = positionBoardCell.position.toString(),
                             color = Color.White,
-                            fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
-                            fontSize = 5.sp
+                            fontSize = 8.sp
                         )
                     }
                 }
                 items(positionBoardCell.pieces){piece->
                     GridCellPieces(
                         color = piece.color,
-                        width = width.div(7f),
+                        width = width.div(7),
                         height = width.div(3),
                         orientation = orientationCell
                     )
@@ -179,15 +174,14 @@ fun CellBoardVerticalMov(width: Dp, height: Dp, orientationCell:String, position
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment =  Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             content ={
-                if(positionBoardCell.position < 68){
+                if(Numbers){
                     item{
                         Text(
                             text = positionBoardCell.position.toString(),
                             color = Color.White,
-                            fontFamily = FontFamily(Font(R.font.pixelify_sans_variable_font_wght, FontWeight.Normal)),
-                            fontSize = 5.sp
+                            fontSize = 8.sp
                         )
                     }
                 }
