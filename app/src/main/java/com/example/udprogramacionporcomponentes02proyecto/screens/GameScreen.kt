@@ -1,7 +1,7 @@
 package com.example.udprogramacionporcomponentes02proyecto.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -18,16 +18,16 @@ import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
 import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.BottomBarGameScreen
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.TopBarGameScreen
-import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridCellJail
-import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridCellZoneWin
-import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridHorizontalCellsBoard
-import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.GridVerticalCellsBoard
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.boardGame.GridCellJail
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.boardGame.GridCellZoneWin
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.boardGame.GridHorizontalCellsBoard
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.boardGame.GridVerticalCellsBoard
 import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.State
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.createNestedListToBoardCell
 
-
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(navController:NavController){
@@ -40,7 +40,7 @@ fun GameScreen(navController:NavController){
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ){
-                GameScreenContent(it)
+                GameScreenContent()
             }
 
         }
@@ -48,7 +48,7 @@ fun GameScreen(navController:NavController){
 }
 
 @Composable
-fun GameScreenContent(padingValues: PaddingValues?){
+fun GameScreenContent(){
     //AQUI VA EL LISTENER DE LA BOARD
 
     val listBoard = MutableList<BoardCell>(100){
@@ -111,5 +111,5 @@ fun ColumnCellsBoardPreview(){
 @Preview
 @Composable
 fun GameScreenContentPreview(){
-    GameScreenContent(null)
+    GameScreenContent()
 }

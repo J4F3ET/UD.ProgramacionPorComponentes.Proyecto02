@@ -4,12 +4,10 @@ import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import com.example.udprogramacionporcomponentes02proyecto.screens.composables.BottomBarPlayersSettingsScreen
-import com.example.udprogramacionporcomponentes02proyecto.screens.composables.ListRooms
-import com.example.udprogramacionporcomponentes02proyecto.screens.composables.TopBarPlayersSettingsScreen
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesPlayerSettingsScreen.BottomBarPlayersSettingsScreen
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesPlayerSettingsScreen.ListRooms
+import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesPlayerSettingsScreen.TopBarPlayersSettingsScreen
 import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -17,15 +15,14 @@ import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 @Composable
 fun PlayersSettingsScreen(navController:NavController){
     Scaffold(
-        topBar = {TopBarPlayersSettingsScreen()},
-        bottomBar = {BottomBarPlayersSettingsScreen(navController)},
+        topBar = { TopBarPlayersSettingsScreen() },
+        bottomBar = { BottomBarPlayersSettingsScreen(navController) },
         content = {
             BackGrounds(1)
             PlayersSettingsScreenContent(navController)
         }
     )
 }
-
 @Composable
 fun PlayersSettingsScreenContent(navController:NavController){
     ListRooms(navController)

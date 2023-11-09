@@ -1,4 +1,4 @@
-package com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen
+package com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.boardGame
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
