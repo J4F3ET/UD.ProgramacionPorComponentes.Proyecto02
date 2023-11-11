@@ -14,7 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,22 +25,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.TextPixel
-import com.example.udprogramacionporcomponentes02proyecto.screens.util.calculateCurrentPlayer
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePlayer
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorPlayer
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.calculateCurrentPlayer
 
 @Composable
 fun BottomBarDice(){
-    var currentThrow1 by remember { mutableIntStateOf(0) }
-    var currentThrow2 by remember { mutableIntStateOf(0) }
+    var currentThrow by remember { mutableStateOf(SessionCurrent.gameState.currentThrow) }
     val updateGame:() -> Unit= {
-        currentThrow1 = (1..6).random()
-        currentThrow2 = (1..6).random()
-        SessionCurrent.gameState.currentPlayer = calculateCurrentPlayer(
+        SessionCurrent.gameState.currentThrow.dataToDices = Pair((1..6).random(), (1..6).random())
+        SessionCurrent.gameState.currentThrow.checkThrow = true
+
+
+        SessionCurrent.gameState.currentThrow.player = calculateCurrentPlayer(
             SessionCurrent.roomGame.players,
-            SessionCurrent.gameState.currentPlayer,currentThrow1,currentThrow2)
+            SessionCurrent.gameState.currentThrow.player,
+            SessionCurrent.gameState.currentThrow.dataToDices
+        )
+        currentThrow = SessionCurrent.gameState.currentThrow
         GameStateService().updateGameState()
     }
     Row(
@@ -58,7 +62,7 @@ fun BottomBarDice(){
                 .height(60.dp),
             contentAlignment = Alignment.TopCenter
         ){
-            TextPixel(text = "$currentThrow1", textStylePixel(Color.White, Color.Black,40))
+            TextPixel(text = "${currentThrow.dataToDices.first}", textStylePixel(Color.White, Color.Black,40))
         }
         Spacer(modifier = Modifier.width(10.dp))
         Box(
@@ -68,7 +72,7 @@ fun BottomBarDice(){
                 .height(60.dp),
             contentAlignment = Alignment.TopCenter
         ){
-            TextPixel(text = "$currentThrow2", textStylePixel(Color.White, Color.Black,40))
+            TextPixel(text = "${currentThrow.dataToDices.second}", textStylePixel(Color.White, Color.Black,40))
         }
     }
 }

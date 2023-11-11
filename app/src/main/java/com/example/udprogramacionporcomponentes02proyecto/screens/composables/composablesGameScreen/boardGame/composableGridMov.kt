@@ -3,6 +3,7 @@ package com.example.udprogramacionporcomponentes02proyecto.screens.composables.c
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -29,9 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
+import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.Numbers
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
-import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
+import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.colorCell
 
 @Composable
@@ -150,7 +156,7 @@ fun CellBoardHorizontalMov(width: Dp, height: Dp, orientationCell:String, positi
                 }
                 items(positionBoardCell.pieces){piece->
                     GridCellPieces(
-                        color = piece.color,
+                        piece = piece,
                         width = width.div(7),
                         height = width.div(3),
                         orientation = orientationCell
@@ -187,7 +193,7 @@ fun CellBoardVerticalMov(width: Dp, height: Dp, orientationCell:String, position
                 }
                 items(positionBoardCell.pieces.size){indexPiece->
                     GridCellPieces(
-                        color = positionBoardCell.pieces[indexPiece].color,
+                        piece = positionBoardCell.pieces[indexPiece],
                         width = width,
                         height = width,
                         orientation = orientationCell
@@ -198,7 +204,8 @@ fun CellBoardVerticalMov(width: Dp, height: Dp, orientationCell:String, position
     }
 }
 @Composable
-fun GridCellPieces(color: ColorP, width: Dp, height: Dp, orientation:String){
+fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
+    // EN 71 =  countStep ENTONCES Piece WIN, recordemos que la celda segura de cuando salen de la carce es un 0
     val rotate = when(orientation){
         "x" -> 90f
         "-x" -> 270f
@@ -206,78 +213,24 @@ fun GridCellPieces(color: ColorP, width: Dp, height: Dp, orientation:String){
         "-y" -> 180f
         else -> 0f
     }
+    val enable by remember {mutableStateOf(SessionCurrent.gameState.currentThrow.player == SessionCurrent.localPlayer)}
     Box(modifier = Modifier
         .background(Color.Transparent)
         .height(height)
         .width(width)
-        .padding(1.dp)){
+        .padding(1.dp)
+        .clickable(
+            enabled = enable,
+            onClickLabel = "Click me",
+            onClick = {}
+        )) {
         Image(
-            modifier = Modifier.background(Color.Transparent).rotate(rotate),
-            painter = painterResource(mapColorImagePiece[color] ?: R.drawable.piece_blue),
+            modifier = Modifier
+                .background(Color.Transparent)
+                .rotate(rotate),
+            painter = painterResource(mapColorImagePiece[piece.color] ?: R.drawable.piece_blue),
             contentDescription = "Piezas en Ceda",
             contentScale = ContentScale.Crop,
         )
     }
 }
-
-/*
-@Preview
-@Composable
-fun ColumnCellsBoardPreview(){
-    val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
-    val listBoard = MutableList<BoardCell>(100){ index ->
-        BoardCell(index, mutableListOf(
-                Piece(ColorP.BLUE,0,State.DANGER),
-                Piece(ColorP.RED,0,State.DANGER)
-            )
-        )
-    }
-    Box(
-        modifier = Modifier
-            .height(maxWidthInDp)
-            .width(maxWidthInDp),
-        contentAlignment = Alignment.Center
-    ){
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3)
-        ){
-            item {
-                ColumnVerticalCellsBoard(ColorP.BLUE,maxWidthInDp,listBoard,false)
-            }
-        }
-    }
-}
-@Preview
-@Composable
-fun RowCelsBoardPreview(){
-    val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
-    val listBoard = MutableList<BoardCell>(100){ index ->
-        BoardCell(index, mutableListOf(
-            Piece(ColorP.BLUE,0,State.DANGER),
-            Piece(ColorP.RED,0,State.DANGER)
-        )
-        )
-    }
-    Box(
-        modifier = Modifier
-            .height(maxWidthInDp)
-            .width(maxWidthInDp),
-        contentAlignment = Alignment.Center
-    ){
-        LazyHorizontalGrid(
-            rows = GridCells.Fixed(3)
-        ){
-            item(3) {
-                RowHorizontalCellsBoard(ColorP.BLUE,maxWidthInDp,listBoard,true)
-            }
-        }
-    }
-}
-@Preview
-@Composable
-fun PreviewCellBoardMov(){
-    val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
-    val positionBoardCell = BoardCell(1, mutableListOf(Piece(ColorP.BLUE,0,State.DANGER)))
-    CellBoardMov(ColorP.BLUE,maxWidthInDp,positionBoardCell)
-}
- */

@@ -24,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
-import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.RulesGame
 
@@ -125,12 +124,7 @@ fun calculateFontSizeByText(texto: String, maxWidthDp: Int): Float {
     }
     return textSize
 }
-fun calculateCurrentPlayer(listToPlayers:List<Player>, oldPlayer: Player, currentThrow1:Int, currentThrow2:Int): Player {
-    if(currentThrow1 == currentThrow2) return oldPlayer
-    val index = listToPlayers.indexOf(oldPlayer)
-    if (index+1 == listToPlayers.size) return listToPlayers[0]
-    return listToPlayers[index+1]
-}
+
 val mapColorSecureZone = mapOf(
     ColorP.BLUE to (92..99).toList() + listOf(55),
     ColorP.YELLOW to (84..91).toList() + listOf(38),
@@ -149,9 +143,9 @@ val listImagesBackgrounds = listOf(
     R.drawable.general_green
 )
 val mapColorImagePlayer = mapOf(
-    ColorP.RED to R.drawable.general_red,
     ColorP.BLUE to R.drawable.general_blue,
     ColorP.YELLOW to R.drawable.general_yellow,
+    ColorP.RED to R.drawable.general_red,
     ColorP.GREEN to R.drawable.general_green
 )
 val mapColorPlayer = mapOf(
@@ -161,7 +155,6 @@ val mapColorPlayer = mapOf(
     ColorP.GREEN to Color(0.349f, 0.62f, 0.286f, 0.8f),
     ColorP.NEUTRAL to Color(0.337f, 0.345f, 0.369f, 0.8f)
 )
-
 val mapColorIndexBackground = mapOf(
     ColorP.BLUE to 3,
     ColorP.YELLOW to 4,
@@ -175,4 +168,4 @@ val mapColorImagePiece = mapOf(
     ColorP.GREEN to R.drawable.piece_green
 )
 
-val Numbers = false
+val Numbers = true

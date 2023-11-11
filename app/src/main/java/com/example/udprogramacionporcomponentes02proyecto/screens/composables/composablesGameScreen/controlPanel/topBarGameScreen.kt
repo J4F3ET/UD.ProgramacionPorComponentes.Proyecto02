@@ -36,10 +36,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
+
 @Composable
 fun CurrentPlayer() {
     var gameState by remember { mutableStateOf(SessionCurrent.gameState) }
-    var colorCurrentPlayer = mapColorPlayer[gameState.currentPlayer.color] ?: Color.Transparent
+    val colorCurrentPlayer = mapColorPlayer[gameState.currentThrow.player.color] ?: Color.Transparent
     val updateGameState:(GameState?)->Unit={
         if(it !=null){
             SessionCurrent.gameState = it
@@ -51,7 +52,7 @@ fun CurrentPlayer() {
             if (dataSnapshot.exists()) {
                 updateGameState(GameStateService().convertDataSnapshotToGameState(dataSnapshot))
             } else {
-                Log.e("Error", "No se pudo convertir dataSnapshot a room")
+                Log.e("Error", "No se pudo convertir dataSnapshot a GameState")
             }
         }
         override fun onCancelled(databaseError: DatabaseError) {
@@ -81,7 +82,7 @@ fun CurrentPlayer() {
                         .width(60.dp)
                         .aspectRatio(1f) // Mantén la relación de aspecto cuadrada
                         .clip(MaterialTheme.shapes.small)
-                        .blur(if (gameState.currentPlayer.color != image.key) 5.dp else 0.dp)
+                        .blur(if (gameState.currentThrow.player.color != image.key) 5.dp else 0.dp)
                         .shadow(10.dp, MaterialTheme.shapes.small, true, colorCurrentPlayer),
                     contentScale = ContentScale.Crop,
 

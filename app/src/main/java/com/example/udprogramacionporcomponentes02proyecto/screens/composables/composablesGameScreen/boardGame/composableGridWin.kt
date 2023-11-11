@@ -169,7 +169,7 @@ fun CellWinner(area: Dp, listBordCell:List<BoardCell>){
                 for (cell in listBordCell){
                     items(cell.pieces){piece->
                         GridCellPieces(
-                            color = piece.color,
+                            piece = piece,
                             width = area.div(4f),
                             height = area.div(2),
                             orientation = "y"

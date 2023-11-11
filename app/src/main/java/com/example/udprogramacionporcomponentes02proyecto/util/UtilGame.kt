@@ -1,10 +1,12 @@
 package com.example.udprogramacionporcomponentes02proyecto.util
 
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.Alignment
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
+import com.example.udprogramacionporcomponentes02proyecto.model.CurrentThrow
 import com.example.udprogramacionporcomponentes02proyecto.model.GameState
+import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.example.udprogramacionporcomponentes02proyecto.model.PlayerService
 import com.example.udprogramacionporcomponentes02proyecto.model.Room
@@ -12,9 +14,40 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorP
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorSecureZone
 
 class UtilGame {
+    fun diceThrow(currentThrow: Pair<Int,Int>){
+        //
+
+        // ACTUALIZA EL JUGADOR ACTUAL
+        SessionCurrent.gameState.currentThrow.player = calculateCurrentPlayer(
+            SessionCurrent.roomGame.players,
+            SessionCurrent.gameState.currentThrow.player,
+            currentThrow
+        )
+    }
+    private fun calculateIndexBoard(piece: Piece,move:Int=0):Int{
+        val possibleIndex = when(piece.color) {
+            ColorP.BLUE -> 55
+            ColorP.YELLOW -> 38
+            ColorP.RED -> 4
+            ColorP.GREEN -> 21
+            else -> 0
+        } + piece.countStep+move
+        //68 es 67 = numero total de celdas recorribles + 1 ya que necesito que el valor de desde 0 a 67
+        return if(possibleIndex>67) possibleIndex-68 else possibleIndex
+    }
+
     companion object{
-        fun initializationGame(uuid:String):GameState = GameState(uuid,MutableList<BoardCell>(75){
-                index -> BoardCell(index, mutableListOf()) },SessionCurrent.localPlayer)
+        fun calculateCurrentPlayer(listToPlayers:List<Player>, oldPlayer: Player, currentThrow: Pair<Int,Int>): Player {
+            if(currentThrow.first == currentThrow.second) return oldPlayer
+            val index = listToPlayers.indexOf(oldPlayer)
+            if (index+1 == listToPlayers.size) return listToPlayers[0]
+            return listToPlayers[index+1]
+        }
+        fun initializationGame(uuid:String):GameState = GameState(
+            uuid,
+            MutableList(100){index -> BoardCell(index, mutableListOf())},
+            CurrentThrow(SessionCurrent.localPlayer)
+        )
         fun checkPlayerColor(player: Player, room: Room): Player {
             // Saca la lista de colores de los jugadores actuales de la room
             val listColorsCurrentRoom = room.players.map { playerRoom -> playerRoom.color }
@@ -42,6 +75,7 @@ class UtilGame {
             return mapColorPlayer[colorP]?:Color.Transparent
         }
         fun createNestedListToBoardCell(locationGrid:String,board:List<BoardCell>):List<List<BoardCell>>{
+            Log.i("createNestedListToBoardCell",board.size.toString())
             val grid2x1 = listOf(//GLOBAL GRID 2X1 HORIZONTAL
                 (60..66).toList().reversed(),
                 (67..73).toList(),

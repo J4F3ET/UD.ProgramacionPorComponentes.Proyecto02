@@ -3,6 +3,7 @@ package com.example.udprogramacionporcomponentes02proyecto.screens.composables.c
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -32,7 +33,15 @@ fun GridCellPiecesJail(color: ColorP, width: Dp){
         .background(Color.Transparent)
         .height(width.div(4))
         .width(width.div(5))
-        .padding(1.dp)){
+        .padding(1.dp)
+        .clickable(
+            enabled = true,
+            onClickLabel = "Click me",
+            onClick = {
+
+            }
+        )
+    ){
         Image(
             modifier = Modifier.background(Color.Transparent),
             painter = painterResource(mapColorImagePiece[color] ?: R.drawable.piece_blue),
