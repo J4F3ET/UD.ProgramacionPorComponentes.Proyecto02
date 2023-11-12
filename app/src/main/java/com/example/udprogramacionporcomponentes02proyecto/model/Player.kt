@@ -8,7 +8,7 @@ data class Player(
     var name: String,
     val color: ColorP,
     val confirms: Pair<Boolean,Boolean> = Pair(false,false),
-    val pieces: List<Piece> = List(4) { Piece(color,0,State.JAIL) }
+    val pieces: MutableList<Piece> = List(4) { Piece(color,0,State.JAIL) }.toMutableList()
 ){
     fun toMap():HashMap<String,Any>{
         val result = HashMap<String,Any>()

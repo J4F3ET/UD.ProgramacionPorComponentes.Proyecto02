@@ -51,6 +51,10 @@ class RoomService {
             callback(null)
         }
     }
+    fun updateRoom(){
+        val roomMap = SessionCurrent.roomGame.toMap()
+        database.child(SessionCurrent.roomGame.key).updateChildren(roomMap)
+    }
     private fun updateRoom(key:String, room:Room){
         val roomMap = room.toMap()
         database.child(key).updateChildren(roomMap)

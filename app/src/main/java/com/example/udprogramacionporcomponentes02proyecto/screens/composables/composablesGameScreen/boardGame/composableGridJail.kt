@@ -80,11 +80,7 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
         .clickable(
             enabled = enable,
             onClickLabel = "Click me",
-            onClick = {
-                //AGREGAR CAMBIOS A LA ROOM PUES NO SE ESTA CAMBIANDO ESTADO DE LA PIECE A AGREFAR
-                addPieceToBoard(piece.color)
-
-            }
+            onClick = {addPieceToBoard(piece.color)}
         )
     ){
         Image(

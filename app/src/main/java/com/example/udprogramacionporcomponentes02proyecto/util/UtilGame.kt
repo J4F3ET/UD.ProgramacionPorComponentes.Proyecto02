@@ -1,7 +1,6 @@
 package com.example.udprogramacionporcomponentes02proyecto.util
 
 
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
 import com.example.udprogramacionporcomponentes02proyecto.model.CurrentThrow
@@ -11,6 +10,7 @@ import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.example.udprogramacionporcomponentes02proyecto.model.PlayerService
 import com.example.udprogramacionporcomponentes02proyecto.model.Room
+import com.example.udprogramacionporcomponentes02proyecto.model.RoomService
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorPlayer
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorSecureZone
 
@@ -45,19 +45,27 @@ class UtilGame {
     }
 
     companion object{
-        fun updateCheckMovDice(currentThrow: CurrentThrow):CurrentThrow{
+        fun updateCheckMovDice(currentThrow: CurrentThrow,mov:Int):CurrentThrow{
+            if(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) return  currentThrow
+
             if(currentThrow.checkMovDice.first)
                 currentThrow.checkMovDice = Pair(true,true)
-            else currentThrow.checkMovDice = Pair(true,false)
+            else
+                currentThrow.checkMovDice = Pair(true,false)
+
             return currentThrow
         }
         fun shouldEnableReleaseButton(currentThrow: CurrentThrow):Boolean{
             if(!currentThrow.checkThrow)return false
+            // Si ya se uso el 5 o el 6
+            if(
+                (currentThrow.dataToDices.first in 5..6 && currentThrow.checkMovDice.first)||
+                (currentThrow.dataToDices.second in 5..6 && currentThrow.checkMovDice.second)
+                ) return false
             //RULE2("Comienzas el juego en la base y debes sacar un 5 para mover una ficha a la casilla de inicio."),
             if(currentThrow.dataToDices.first + currentThrow.dataToDices.second == 5) return true
-            if(currentThrow.dataToDices.first == 5 || currentThrow.dataToDices.second == 5) return true
             //RULE5("Si sacas un 6, puedes sacar una ficha de la base o mover una ficha 6 casillas."),
-            if(currentThrow.dataToDices.first == 6 || currentThrow.dataToDices.second == 6) return true
+            if(currentThrow.dataToDices.first in 5..6 || currentThrow.dataToDices.second in 5..6) return true
             return false
         }
          fun endShift(){
@@ -76,11 +84,33 @@ class UtilGame {
         }
         fun addPieceToBoard(color:ColorP){
             if(SessionCurrent.gameState.currentThrow.checkMovDice.first && SessionCurrent.gameState.currentThrow.checkMovDice.second) return
+            val dice1 = SessionCurrent.gameState.currentThrow.dataToDices.first
+            val dice2 = SessionCurrent.gameState.currentThrow.dataToDices.second
+            val sum = dice1  +  dice2
+            if(sum in 5..6){
+                SessionCurrent.gameState.currentThrow = updateCheckMovDice(SessionCurrent.gameState.currentThrow,dice1)
+                SessionCurrent.gameState.currentThrow = updateCheckMovDice(SessionCurrent.gameState.currentThrow,dice2)
+            }
             val newPiece = Piece(color,0,State.SAFE)
             SessionCurrent.gameState.board[UtilGame().calculateIndexBoard(newPiece)].pieces.add(newPiece)
-            SessionCurrent.gameState.currentThrow = updateCheckMovDice(SessionCurrent.gameState.currentThrow)
+            SessionCurrent.gameState.currentThrow = updateCheckMovDice(SessionCurrent.gameState.currentThrow,if(!SessionCurrent.gameState.currentThrow.checkMovDice.first && dice1 in 5..6) dice1 else dice2)
+            updateStateJailToSafe(newPiece)
+            RoomService().updateRoom()
             GameStateService().updateGameState()
         }
+        fun updateStateJailToSafe(piece: Piece) {
+            // Encuentra al jugador actual
+            val currentPlayer = SessionCurrent.roomGame.players.find { player ->
+                player.uuid == SessionCurrent.gameState.currentThrow.player.uuid &&
+                        player.uuid == SessionCurrent.localPlayer.uuid
+            }
+            // Si el jugador actual existe, actualiza el estado de la pieza
+            currentPlayer?.let { player ->
+                val pieceIndex = player.pieces.indexOfFirst { pieceFind -> pieceFind.state == State.JAIL }
+                player.pieces[pieceIndex] = piece
+            }
+        }
+
         fun calculateCurrentPlayer(listToPlayers:List<Player>, oldPlayer: Player, currentThrow: Pair<Int,Int>): Player {
             if(currentThrow.first == currentThrow.second) return oldPlayer
             val index = listToPlayers.indexOf(oldPlayer)
