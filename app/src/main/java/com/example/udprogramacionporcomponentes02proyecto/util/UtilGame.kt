@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
 import com.example.udprogramacionporcomponentes02proyecto.model.CurrentThrow
 import com.example.udprogramacionporcomponentes02proyecto.model.GameState
+import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
 import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.model.Player
 import com.example.udprogramacionporcomponentes02proyecto.model.PlayerService
@@ -18,13 +19,20 @@ class UtilGame {
         //
 
         // ACTUALIZA EL JUGADOR ACTUAL
-        SessionCurrent.gameState.currentThrow.player = calculateCurrentPlayer(
-            SessionCurrent.roomGame.players,
-            SessionCurrent.gameState.currentThrow.player,
-            currentThrow
-        )
+
     }
-    private fun calculateIndexBoard(piece: Piece,move:Int=0):Int{
+    fun verifyCellEliminatePiece(cell: BoardCell):BoardCell{
+        if(cell.pieces.size <= 1)return cell
+        val lastColor = cell.pieces.last().color
+        //takeIf verifica que no este vacia la List,
+        cell.pieces.takeIf {it.isNotEmpty() }?.let{
+            //despues remueve las pieces que no posean el color de la piece final
+            it.removeAll{piece -> piece.color != lastColor }
+        }
+        return cell
+    }
+
+    fun calculateIndexBoard(piece: Piece,move:Int=0):Int{
         val possibleIndex = when(piece.color) {
             ColorP.BLUE -> 55
             ColorP.YELLOW -> 38
@@ -37,6 +45,42 @@ class UtilGame {
     }
 
     companion object{
+        fun updateCheckMovDice(currentThrow: CurrentThrow):CurrentThrow{
+            if(currentThrow.checkMovDice.first)
+                currentThrow.checkMovDice = Pair(true,true)
+            else currentThrow.checkMovDice = Pair(true,false)
+            return currentThrow
+        }
+        fun shouldEnableReleaseButton(currentThrow: CurrentThrow):Boolean{
+            if(!currentThrow.checkThrow)return false
+            //RULE2("Comienzas el juego en la base y debes sacar un 5 para mover una ficha a la casilla de inicio."),
+            if(currentThrow.dataToDices.first + currentThrow.dataToDices.second == 5) return true
+            if(currentThrow.dataToDices.first == 5 || currentThrow.dataToDices.second == 5) return true
+            //RULE5("Si sacas un 6, puedes sacar una ficha de la base o mover una ficha 6 casillas."),
+            if(currentThrow.dataToDices.first == 6 || currentThrow.dataToDices.second == 6) return true
+            return false
+        }
+         fun endShift(){
+            SessionCurrent.gameState.board.forEach{
+                UtilGame().verifyCellEliminatePiece(it)
+            }
+            SessionCurrent.gameState.currentThrow.player = calculateCurrentPlayer(
+                SessionCurrent.roomGame.players,
+                SessionCurrent.gameState.currentThrow.player,
+                SessionCurrent.gameState.currentThrow.dataToDices
+            )
+            SessionCurrent.gameState.currentThrow.checkMovDice = Pair(false,false)
+            SessionCurrent.gameState.currentThrow.checkThrow = false
+            SessionCurrent.gameState.currentThrow.dataToDices = Pair(0,0)
+            GameStateService().updateGameState()
+        }
+        fun addPieceToBoard(color:ColorP){
+            if(SessionCurrent.gameState.currentThrow.checkMovDice.first && SessionCurrent.gameState.currentThrow.checkMovDice.second) return
+            val newPiece = Piece(color,0,State.SAFE)
+            SessionCurrent.gameState.board[UtilGame().calculateIndexBoard(newPiece)].pieces.add(newPiece)
+            SessionCurrent.gameState.currentThrow = updateCheckMovDice(SessionCurrent.gameState.currentThrow)
+            GameStateService().updateGameState()
+        }
         fun calculateCurrentPlayer(listToPlayers:List<Player>, oldPlayer: Player, currentThrow: Pair<Int,Int>): Player {
             if(currentThrow.first == currentThrow.second) return oldPlayer
             val index = listToPlayers.indexOf(oldPlayer)
@@ -75,7 +119,6 @@ class UtilGame {
             return mapColorPlayer[colorP]?:Color.Transparent
         }
         fun createNestedListToBoardCell(locationGrid:String,board:List<BoardCell>):List<List<BoardCell>>{
-            Log.i("createNestedListToBoardCell",board.size.toString())
             val grid2x1 = listOf(//GLOBAL GRID 2X1 HORIZONTAL
                 (60..66).toList().reversed(),
                 (67..73).toList(),
@@ -110,6 +153,5 @@ class UtilGame {
             return listNestedToCells
         }
     }
-
 }
 

@@ -2,6 +2,7 @@ package com.example.udprogramacionporcomponentes02proyecto.model
 
 import android.content.ContentValues
 import android.util.Log
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.convertMapToPairBooleanBoolean
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.State
@@ -68,7 +69,7 @@ class PlayerService {
         val key = dataSnapshot.child("uuid").value.toString()
         val name = dataSnapshot.child("name").value.toString()
         val colorString = dataSnapshot.child("color").value as String // Obtiene la cadena de la base de datos
-        val confirm = dataSnapshot.child("confirms").value as? Pair<Boolean, Boolean>?:Pair(false,false)
+        val confirm = convertMapToPairBooleanBoolean(dataSnapshot.child("confirms").value as Map<*, *>)
         val color = ColorP.valueOf(colorString) // Convierte la cadena en un valor del enum
         val pieces = mutableListOf<Piece>()
         for(pieceData in dataSnapshot.child("pieces").children){

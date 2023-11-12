@@ -2,6 +2,7 @@ package com.example.udprogramacionporcomponentes02proyecto.screens
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.graphics.Color
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
 import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
+import com.example.udprogramacionporcomponentes02proyecto.model.Piece
+import com.example.udprogramacionporcomponentes02proyecto.model.Player
+import com.example.udprogramacionporcomponentes02proyecto.model.Room
+import com.example.udprogramacionporcomponentes02proyecto.model.RoomService
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.BottomBarGameScreen
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.TopBarGameScreen
 import com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.boardGame.GridCellJail
@@ -59,12 +64,43 @@ fun GameScreen(navController:NavController){
 @Composable
 fun GameScreenContent(){
     //VARIABLE DE STADO POR SECCION
+    var roomData by remember { mutableStateOf(SessionCurrent.roomGame.players) }
     var listBoard by remember { mutableStateOf(SessionCurrent.gameState.board) }
+    var list1x1 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.BLUE}?.pieces) }
     var list1x2 by remember {mutableStateOf(createNestedListToBoardCell("1x2",listBoard))}
+    var list1x3 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.YELLOW}?.pieces) }
     var list2x1 by remember {mutableStateOf(createNestedListToBoardCell("2x1",listBoard))}
     var list2x3 by remember {mutableStateOf(createNestedListToBoardCell("2x3",listBoard))}
+    var list3x1 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.RED}?.pieces) }
     var list3x2 by remember {mutableStateOf(createNestedListToBoardCell("3x2",listBoard))}
-    //AQUI VA EL LISTENER DE LA BOARD
+    var list3x3 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.GREEN}?.pieces) }
+    //AQUI VA LOS CALLBACK
+    //Callbak Cell Jail
+    val litsPiecesInJail:(MutableList<Player>?)-> Unit = { listPlayer ->
+        if(listPlayer != null){
+            val newList1x1 = listPlayer.find { it.color == ColorP.BLUE }?.pieces
+            val newList1x3 = listPlayer.find { it.color == ColorP.YELLOW }?.pieces
+            val newList3x1 = listPlayer.find { it.color == ColorP.RED }?.pieces
+            val newList3x3 = listPlayer.find { it.color == ColorP.GREEN }?.pieces
+            if(list1x1 != newList1x1){
+                list1x1 = newList1x1
+                Log.i("GameScreenContent","Update Section 1x1")
+            }
+            if(list1x3 != newList1x3){
+                list1x3 = newList1x3
+                Log.i("GameScreenContent","Update Section 1X3")
+            }
+            if(list3x1 != newList3x1){
+                list3x1 = newList3x1
+                Log.i("GameScreenContent","Update Section 3X1")
+            }
+            if(list3x3 != newList3x3){
+                list3x3 = newList3x3
+                Log.i("GameScreenContent","Update Section 3x3")
+            }
+        }
+    }
+    //Callback CellMov
     val updateListGameState:(MutableList<BoardCell>?)->Unit={
         if(it !=null){
             listBoard = it
@@ -72,20 +108,41 @@ fun GameScreenContent(){
             val newList2x1 = createNestedListToBoardCell("2x1",listBoard)
             val newList2x3 = createNestedListToBoardCell("2x3",listBoard)
             val newList3x2 = createNestedListToBoardCell("3x2",listBoard)
-            if(list1x2 != newList1x2){
+            if(list1x2.flatten() != newList1x2.flatten()){
                 list1x2 = newList1x2
+                Log.i("GameScreenContent","Update Section 1x2")
             }
-            if(list2x1 != newList2x1){
+            if(list2x1.flatten() != newList2x1.flatten()){
                 list2x1 = newList2x1
+                Log.i("GameScreenContent","Update Section 2x1")
             }
-            if(list2x3 != newList2x3){
+            if(list2x3.flatten() != newList2x3.flatten()){
                 list2x3 = newList2x3
+                Log.i("GameScreenContent","Update Section 2x3")
             }
-            if(list3x2 != newList3x2){
+            if(list3x2.flatten() != newList3x2.flatten()){
                 list3x2 = newList3x2
+                Log.i("GameScreenContent","Update Section 3x2")
             }
         }
     }
+    //AQUI VA EL LISTENER DE LOS ROOM PLAYER
+    val roomValueEventListener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            if (dataSnapshot.exists()) {
+                roomData = RoomService().convertDataSnapshotToRoom(dataSnapshot).players
+                SessionCurrent.roomGame.players = roomData
+            } else {
+                Log.e("Error", "No se pudo convertir dataSnapshot a room")
+            }
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
+        }
+    }
+    RoomService().getDatabaseChild(SessionCurrent.roomGame.key).addValueEventListener(roomValueEventListener)
+    //AQUI VA EL LISTENER DE LA BOARD
+
     val listGameStateValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
@@ -101,9 +158,7 @@ fun GameScreenContent(){
     }
     GameStateService().getDatabaseChild(SessionCurrent.gameState.key).addValueEventListener(listGameStateValueEventListener)
 
-
     val maxWidthInDp = (LocalContext.current.resources.displayMetrics.widthPixels.div(9)).dp
-    //AQUIVA LOS MUTABLE DE CADA ZONA
 
     Box(
         contentAlignment = Alignment.Center
@@ -112,13 +167,13 @@ fun GameScreenContent(){
             columns = GridCells.Fixed(3), // 3 columnas\
             content = {
                 item {//Seccion #1X1 JAIL
-                    GridCellJail(color = ColorP.BLUE,maxWidthInDp)
+                    GridCellJail(list1x1,ColorP.BLUE,maxWidthInDp)
                 }
                 item{//Seccion #1X2 CELL
                     GridVerticalCellsBoard(list1x2,maxWidthInDp,false)
                 }
                 item {//Seccion #1X3 JAIL
-                    GridCellJail(color = ColorP.YELLOW,maxWidthInDp)
+                    GridCellJail(list1x3,ColorP.YELLOW,maxWidthInDp)
                 }
                 item{//Seccion #2X1 CELL
                     GridHorizontalCellsBoard(list2x1,maxWidthInDp,false)
@@ -130,20 +185,15 @@ fun GameScreenContent(){
                     GridHorizontalCellsBoard(list2x3,maxWidthInDp,true)
                 }
                 item {//Seccion #3X1 JAIL
-                    GridCellJail(color = ColorP.RED,maxWidthInDp)
+                    GridCellJail(list3x1,ColorP.RED,maxWidthInDp)
                 }
                 item{//Seccion #3X2 CELL
                     GridVerticalCellsBoard(list3x2,maxWidthInDp,true)
                 }
                 item {//Seccion #3X3 JAIL
-                    GridCellJail(color = ColorP.GREEN,maxWidthInDp)
+                    GridCellJail(list3x3,ColorP.GREEN,maxWidthInDp)
                 }
             }
         )
     }
-}
-@Preview
-@Composable
-fun GameScreenContentPreview(){
-    GameScreenContent()
 }

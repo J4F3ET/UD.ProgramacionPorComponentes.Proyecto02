@@ -2,7 +2,7 @@ package com.example.udprogramacionporcomponentes02proyecto.model
 
 data class Room(
     val key: String,
-    val players: MutableList<Player>,
+    var players: MutableList<Player>,
     var gameStateKey: String
 ){
     fun toMap(): HashMap<String, Any> {

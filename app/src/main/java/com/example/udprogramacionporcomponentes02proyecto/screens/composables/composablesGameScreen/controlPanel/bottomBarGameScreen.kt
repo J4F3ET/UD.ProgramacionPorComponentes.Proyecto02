@@ -29,29 +29,22 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorI
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorPlayer
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.calculateCurrentPlayer
 
 @Composable
 fun BottomBarDice(){
     var currentThrow by remember { mutableStateOf(SessionCurrent.gameState.currentThrow) }
-    val updateGame:() -> Unit= {
+    val updateDiceGame:() -> Unit= {
         SessionCurrent.gameState.currentThrow.dataToDices = Pair((1..6).random(), (1..6).random())
         SessionCurrent.gameState.currentThrow.checkThrow = true
-
-
-        SessionCurrent.gameState.currentThrow.player = calculateCurrentPlayer(
-            SessionCurrent.roomGame.players,
-            SessionCurrent.gameState.currentThrow.player,
-            SessionCurrent.gameState.currentThrow.dataToDices
-        )
         currentThrow = SessionCurrent.gameState.currentThrow
         GameStateService().updateGameState()
     }
+    if(SessionCurrent.gameState.currentThrow.player != SessionCurrent.localPlayer)return
     Row(
         modifier = Modifier.clickable(
-            enabled = true,
+            enabled = SessionCurrent.gameState.currentThrow.player == SessionCurrent.localPlayer,
             onClick = {
-                updateGame()
+                updateDiceGame()
             }
         )
     ){

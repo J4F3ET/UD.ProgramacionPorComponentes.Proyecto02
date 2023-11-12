@@ -1,6 +1,8 @@
 package com.example.udprogramacionporcomponentes02proyecto.model
 
 import android.util.Log
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.convertMapToPairBooleanBoolean
+import com.example.udprogramacionporcomponentes02proyecto.screens.util.convertMapToPairIntInt
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.State
@@ -43,12 +45,12 @@ class GameStateService {
     fun deleteGameState(uuid: String){
         database.child(uuid).removeValue()
     }
-    private fun convertDataSnapshotToCurrentThrow(dataSnapshot: DataSnapshot):CurrentThrow?{
+    fun convertDataSnapshotToCurrentThrow(dataSnapshot: DataSnapshot):CurrentThrow?{
         val player = PlayerService().convertDataSnapshotToPlayer(dataSnapshot.child("player"))
             ?: return null
         val checkThrow = dataSnapshot.child("checkThrow").value as Boolean
-        val checkMovDice = dataSnapshot.child("checkMovDice").value as? Pair<Boolean,Boolean>?: Pair(false,false)
-        val dataToDices = dataSnapshot.child("dataToDices").value as? Pair<Int,Int>?: Pair(0,0)
+        val checkMovDice = convertMapToPairBooleanBoolean(dataSnapshot.child("checkMovDice").value as Map<*,*>)
+        val dataToDices = convertMapToPairIntInt(dataSnapshot.child("dataToDices").value as Map<*,*>)
         return CurrentThrow(player,checkThrow,checkMovDice,dataToDices)
     }
     fun convertDataSnapshotToListBoardCell(dataSnapshot:DataSnapshot):MutableList<BoardCell>{
@@ -59,7 +61,7 @@ class GameStateService {
             for(pieceData in cellData.child("pieces").children){
                 val color = ColorP.valueOf(pieceData.child("color").value.toString()) // Convierte la cadena en un valor del enum
                 val statePiece = State.valueOf(pieceData.child("state").value.toString())
-                val countStep: Int = pieceData.child("countStep").value as Int
+                val countStep: Int = pieceData.child("countStep").value.toString().toInt()
                 pieces.add(Piece(color,countStep,statePiece))
             }
             list.add(BoardCell(position,pieces))

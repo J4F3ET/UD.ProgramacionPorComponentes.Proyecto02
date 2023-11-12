@@ -3,6 +3,7 @@ package com.example.udprogramacionporcomponentes02proyecto.screens.util
 import android.content.res.Resources
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.Log
 import android.util.TypedValue
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.height
@@ -75,6 +76,16 @@ fun TextPixel(text:String, textStyle: TextStyle){
         modifier = Modifier.padding(0.dp,15.dp,0.dp,0.dp),
         style = textStyle
     )
+}
+fun convertMapToPairBooleanBoolean(map: Map<*, *>): Pair<Boolean, Boolean> {
+    val firstValue = map["first"].toString().toBoolean()
+    val secondValue = map["second"].toString().toBoolean()
+    return Pair(firstValue, secondValue)
+}
+fun convertMapToPairIntInt(map: Map<*, *>):Pair<Int,Int>{
+    val firstValue = map["first"].toString().toInt()
+    val secondValue = map["second"].toString().toInt()
+    return Pair(firstValue, secondValue)
 }
 fun shadowColor(color:Color) = Shadow(
     color = color,
