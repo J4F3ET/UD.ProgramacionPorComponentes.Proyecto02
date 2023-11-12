@@ -32,6 +32,9 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorI
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorPlayer
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.endShift
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.resolveEndShift
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -45,6 +48,9 @@ fun CurrentPlayer() {
         if(it !=null){
             SessionCurrent.gameState = it
             gameState = SessionCurrent.gameState
+            if((gameState.currentThrow.checkMovDice.first && gameState.currentThrow.checkMovDice.second)||resolveEndShift(gameState.currentThrow)){
+                endShift()
+            }
         }
     }
     val gameStateValueEventListener = object : ValueEventListener {
@@ -64,7 +70,8 @@ fun CurrentPlayer() {
     val mapPlayersInGame: Map<ColorP, Int> =
         mapColorImagePlayer.filterKeys { key -> key in SessionCurrent.roomGame.players.map { it.color } }
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .shadow(5.dp, MaterialTheme.shapes.small, true, colorCurrentPlayer),
         contentAlignment = Alignment.Center
     ) {

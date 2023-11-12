@@ -40,7 +40,7 @@ import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.State
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.addPieceToBoard
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.endShift
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButton
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonCellJail
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -48,21 +48,18 @@ import com.google.firebase.database.ValueEventListener
 @Composable
 fun GridCellPiecesJail(piece: Piece, width: Dp){
     var currentThrow by remember {mutableStateOf(SessionCurrent.gameState.currentThrow)}
-    var enable by remember {mutableStateOf(shouldEnableReleaseButton(currentThrow))}
+    var enable by remember {mutableStateOf(shouldEnableReleaseButtonCellJail(currentThrow))}
     val updateCurrentThrow:(CurrentThrow?)->Unit = {
         if (it != null){
             SessionCurrent.gameState.currentThrow = it
             currentThrow = SessionCurrent.gameState.currentThrow
-            enable = shouldEnableReleaseButton(currentThrow)
+            enable = shouldEnableReleaseButtonCellJail(currentThrow)
         }
     }
     val listGameStateValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
                 updateCurrentThrow(GameStateService().convertDataSnapshotToCurrentThrow(dataSnapshot.child("currentThrow")))
-                if(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second){
-                    endShift()
-                }
             } else {
                 Log.e("Error", "No se pudo convertir dataSnapshot a list<BoadCell>")
             }
@@ -119,7 +116,7 @@ fun GridCellJail(listPiece: List<Piece>?, color: ColorP, width: Dp){
         ){
             if(listMutable.isEmpty())return
             LazyVerticalGrid(
-                columns = GridCells.Fixed(if(listMutable.size >2)2 else 1),
+                columns = GridCells.Fixed(2),
                 content = {
                     items(listMutable){
                         GridCellPiecesJail(it,width)

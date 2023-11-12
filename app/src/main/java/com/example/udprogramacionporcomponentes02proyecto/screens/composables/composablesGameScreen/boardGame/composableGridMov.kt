@@ -1,5 +1,7 @@
 package com.example.udprogramacionporcomponentes02proyecto.screens.composables.composablesGameScreen.boardGame
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,11 +36,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udprogramacionporcomponentes02proyecto.R
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
+import com.example.udprogramacionporcomponentes02proyecto.model.CurrentThrow
+import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
 import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.Numbers
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.colorCell
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.endShift
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.movPieceToBoard
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonCellMov
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 
 @Composable
 fun GridVerticalCellsBoard(listColumns:List<List<BoardCell>>, width: Dp, directionInvert:Boolean){
@@ -205,7 +216,28 @@ fun CellBoardVerticalMov(width: Dp, height: Dp, orientationCell:String, position
 }
 @Composable
 fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
-    // EN 71 =  countStep ENTONCES Piece WIN, recordemos que la celda segura de cuando salen de la carce es un 0
+    var currentThrow by remember {mutableStateOf(SessionCurrent.gameState.currentThrow)}
+    var enable by remember {mutableStateOf(shouldEnableReleaseButtonCellMov(currentThrow,piece))}
+    val updateCurrentThrow:(CurrentThrow?)->Unit = {
+        if (it != null){
+            SessionCurrent.gameState.currentThrow = it
+            currentThrow = SessionCurrent.gameState.currentThrow
+            enable = shouldEnableReleaseButtonCellMov(currentThrow,piece)
+        }
+    }
+    val listGameStateValueEventListener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            if (dataSnapshot.exists()) {
+                updateCurrentThrow(GameStateService().convertDataSnapshotToCurrentThrow(dataSnapshot.child("currentThrow")))
+            } else {
+                Log.e("Error", "No se pudo convertir dataSnapshot a list<BoadCell>")
+            }
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
+        }
+    }
+    GameStateService().getDatabaseChild(SessionCurrent.gameState.key).addValueEventListener(listGameStateValueEventListener)
     val rotate = when(orientation){
         "x" -> 90f
         "-x" -> 270f
@@ -213,7 +245,6 @@ fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
         "-y" -> 180f
         else -> 0f
     }
-    val enable by remember {mutableStateOf(SessionCurrent.gameState.currentThrow.player == SessionCurrent.localPlayer)}
     Box(modifier = Modifier
         .background(Color.Transparent)
         .height(height)
@@ -222,7 +253,9 @@ fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
         .clickable(
             enabled = enable,
             onClickLabel = "Click me",
-            onClick = {}
+            onClick = {
+                movPieceToBoard(piece,currentThrow)
+            }
         )) {
         Image(
             modifier = Modifier
