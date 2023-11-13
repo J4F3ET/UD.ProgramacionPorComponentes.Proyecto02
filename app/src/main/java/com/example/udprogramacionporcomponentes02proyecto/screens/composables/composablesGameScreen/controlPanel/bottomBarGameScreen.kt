@@ -33,27 +33,38 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorP
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.resolveUpdateDiceToGameState
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonDice
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
 @Composable
 fun BottomBarDice(){
-    var currentThrow by remember { mutableStateOf(SessionCurrent.gameState.currentThrow) }
-    var enable by remember {mutableStateOf(currentThrow.player == SessionCurrent.localPlayer && !currentThrow.checkThrow)}
+    var currentThrow by remember {
+        mutableStateOf(SessionCurrent.gameState.currentThrow)
+    }
+    var enable by remember {
+        mutableStateOf(
+            shouldEnableReleaseButtonDice(SessionCurrent.gameState.currentThrow)
+        )
+    }
     val colorCurrentThrow = mapColorPlayer[currentThrow.player.color]
+
     val updateDiceGame:() -> Unit= {
-        currentThrow.dataToDices = Pair((1..6).random(), (1..6).random())
         currentThrow.checkThrow = true
-        SessionCurrent.gameState.currentThrow = currentThrow
-        GameStateService().updateGameState()
+        currentThrow.dataToDices = Pair((1..6).random(), (1..6).random())
+        if(resolveUpdateDiceToGameState(currentThrow)) {
+            SessionCurrent.gameState.currentThrow = currentThrow
+            GameStateService().updateGameState()
+        }
     }
     val updateCurrentThrow:(CurrentThrow?)->Unit = {
         if (it != null){
             currentThrow = it
-            SessionCurrent.gameState.currentThrow = currentThrow
-            enable = currentThrow.player == SessionCurrent.localPlayer && !currentThrow.checkThrow
-            if(UtilGame.finishEndShift(currentThrow)){
+            SessionCurrent.gameState.currentThrow = it
+            enable = shouldEnableReleaseButtonDice(it)
+            if(UtilGame.finishEndShift(it)){
                 UtilGame.endShift(SessionCurrent.gameState)
             }
         }

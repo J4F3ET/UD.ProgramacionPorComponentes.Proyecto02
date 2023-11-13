@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
+import com.example.udprogramacionporcomponentes02proyecto.model.GameState
 import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
 import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.model.Player
@@ -79,34 +80,31 @@ fun GameScreenContent(){
     val updateListGameState:(MutableList<BoardCell>?)->Unit={
         if(it !=null){
             listBoard = it
-            val newList1x2 = createNestedListToBoardCell("1x2",listBoard)
-            val newList2x1 = createNestedListToBoardCell("2x1",listBoard)
-            val newList2x3 = createNestedListToBoardCell("2x3",listBoard)
-            val newList3x2 = createNestedListToBoardCell("3x2",listBoard)
-            if(list1x2.flatten() != newList1x2.flatten()){
+            val newList1x2 = createNestedListToBoardCell("1x2",it)
+            val newList2x1 = createNestedListToBoardCell("2x1",it)
+            val newList2x3 = createNestedListToBoardCell("2x3",it)
+            val newList3x2 = createNestedListToBoardCell("3x2",it)
+
+            if(list1x2.flatten() != newList1x2.flatten())
                 list1x2 = newList1x2
-                Log.i("GameScreenContent","Update Section 1x2")
-            }
-            if(list2x1.flatten() != newList2x1.flatten()){
+
+            if(list2x1.flatten() != newList2x1.flatten())
                 list2x1 = newList2x1
-                Log.i("GameScreenContent","Update Section 2x1")
-            }
-            if(list2x3.flatten() != newList2x3.flatten()){
+
+            if(list2x3.flatten() != newList2x3.flatten())
                 list2x3 = newList2x3
-                Log.i("GameScreenContent","Update Section 2x3")
-            }
-            if(list3x2.flatten() != newList3x2.flatten()){
+
+            if(list3x2.flatten() != newList3x2.flatten())
                 list3x2 = newList3x2
-                Log.i("GameScreenContent","Update Section 3x2")
-            }
+
         }
     }
     //AQUI VA EL LISTENER DE LOS ROOM PLAYER
     val roomValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
-                roomData = RoomService().convertDataSnapshotToRoom(dataSnapshot).players
-                SessionCurrent.roomGame.players = roomData
+                SessionCurrent.roomGame = RoomService().convertDataSnapshotToRoom(dataSnapshot)
+                roomData = SessionCurrent.roomGame.players
             } else {
                 Log.e("Error", "No se pudo convertir dataSnapshot a room")
             }

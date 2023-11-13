@@ -69,25 +69,17 @@ class UtilGame {
     }
     companion object{
         private fun updateCheckReleasePieceDice(currentThrow: CurrentThrow):CurrentThrow{
-
-            //Verifica que los dados no se hallan usado
-            if(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) {
-                return currentThrow
-            }
-            //Verifica que el primero no este en uso y cumpla con ser 6 o 5
-            if(!currentThrow.checkMovDice.first && currentThrow.dataToDices.first in 5..6) {
-                currentThrow.checkMovDice = Pair(true, currentThrow.checkMovDice.second)
-                return currentThrow
-            }
-            //Verifica que el segundo no este en uso y cumpla con ser 6 o 5
-            if(!currentThrow.checkMovDice.second && currentThrow.dataToDices.second in 5..6){
-                currentThrow.checkMovDice = Pair(currentThrow.checkMovDice.first,true)
-                return  currentThrow
-            }
-            //Verifica que la suma de de los dados y si la suma de 5 o 6 retorna el doble uso
-            if(!currentThrow.checkMovDice.first && !currentThrow.checkMovDice.second && currentThrow.dataToDices.first+currentThrow.dataToDices.second  in 5..6)
+            if(!(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) && currentThrow.dataToDices.first + currentThrow.dataToDices.second in 5..6){
                 currentThrow.checkMovDice = Pair(true,true)
-            return currentThrow
+            }else{
+                //Si el primer movimiento ya se efectuo y el segundo esta en 5..6 quiere dercir que el segundo es true
+                if(currentThrow.dataToDices.second in 5..6){
+                    currentThrow.checkMovDice = Pair(currentThrow.checkMovDice.first,true)
+                }else{
+                    currentThrow.checkMovDice = Pair(true,currentThrow.checkMovDice.second)
+                }
+            }
+            return  currentThrow
         }
         fun shouldEnableReleaseButtonCellMov(currentThrow: CurrentThrow,piece:Piece):Boolean{
             //Verifica que se alla lanzado los dados
@@ -105,16 +97,42 @@ class UtilGame {
             //RULE2("Comienzas el juego en la base y debes sacar un 5 para mover una ficha a la casilla de inicio."),
             //RULE5("Si sacas un 6, puedes sacar una ficha de la base o mover una ficha 6 casillas."),
 
-            //Verifica que se alla lanzado los dados
-            if(!currentThrow.checkThrow)return false
-            //Verificar el uso de los lanzamientos
-            if(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) return false
             // Verifica que si el dado uno se uso y cumple con el 5 y 6
-            if(!currentThrow.checkMovDice.first && currentThrow.dataToDices.first in 5..6)return true
+            if(!currentThrow.checkMovDice.first && (currentThrow.dataToDices.first in 5..6))
+                return true
             // Verifica que si el dado dos se uso y cumple con el 5 y 6
-            if(!currentThrow.checkMovDice.second && currentThrow.dataToDices.second in 5..6)return true
+            if(!currentThrow.checkMovDice.second && (currentThrow.dataToDices.second in 5..6))
+                return true
             // La suma da 5 o 6 y no se han usado los lazamientos(2)
-            if(!currentThrow.checkMovDice.first && !currentThrow.checkMovDice.second && currentThrow.dataToDices.first+currentThrow.dataToDices.second  in 5..6) return true
+            if(
+                !(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) &&
+                currentThrow.dataToDices.first+currentThrow.dataToDices.second  in 5..6
+                ) return true
+            return false
+        }
+        fun shouldEnableReleaseButtonDice(currentThrow: CurrentThrow):Boolean{
+            //Si el jugador es el correcto
+            if(currentThrow.player == SessionCurrent.localPlayer){
+                //Si no ha oprimido el boton
+                if(!currentThrow.checkThrow){
+                    //Si algunod e los dados esta en 0
+                    if((currentThrow.dataToDices.first == 0 || currentThrow.dataToDices.second == 0)&& !currentThrow.checkMovDice.first&& !currentThrow.checkMovDice.first){
+                        return true
+                    }
+                }
+            }
+            return false
+
+        }
+        fun resolveUpdateDiceToGameState(currentThrow:CurrentThrow):Boolean{
+            if(
+                !currentThrow.checkMovDice.first && //Si no se registra movimiento 1
+                !currentThrow.checkMovDice.second &&//Si no se registra movimiento 2
+                currentThrow.dataToDices.first != 0 && // Si el dado uno es diferente a 0
+                currentThrow.dataToDices.second != 0 // Si el dado dos es diferente a 0
+            ){
+                return true
+            }
             return false
         }
         fun endShift(gameState: GameState){
@@ -122,58 +140,60 @@ class UtilGame {
             gameState.board.forEach{
                 UtilGame().verifyCellEliminatePiece(it)
             }
-            gameState.currentThrow.player = calculateCurrentPlayer(
-                SessionCurrent.roomGame.players,
-                gameState.currentThrow
+            gameState.currentThrow = CurrentThrow(
+                calculateCurrentPlayer(SessionCurrent.roomGame.players,gameState.currentThrow)
             )
-            gameState.currentThrow.checkMovDice = Pair(false,false)
-            gameState.currentThrow.checkThrow = false
-            gameState.currentThrow.dataToDices = Pair(0,0)
             SessionCurrent.gameState = gameState
-            RoomService().updateRoom()
             GameStateService().updateGameState()
         }
-        fun addPieceToBoard(currentThrow:CurrentThrow){
-            if(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) return
+        fun addPieceToBoard(currentThrow:CurrentThrow):CurrentThrow{
+            //Funcion solo es posible sis e habilita la salida de celdas de la carcel
+            //shouldEnableReleaseButtonCellJail
             val newPiece = updateStateJailToSafe()
-            SessionCurrent.gameState.board[UtilGame().calculateIndexBoard(newPiece)].pieces.add(newPiece)
-            SessionCurrent.gameState.currentThrow = updateCheckReleasePieceDice(currentThrow)
-            GameStateService().updateGameState()
+            val indexNewPieceToBoard = UtilGame().calculateIndexBoard(newPiece)
+            SessionCurrent.gameState.board[indexNewPieceToBoard].pieces.add(newPiece)
+            return updateCheckReleasePieceDice(currentThrow)
         }
-        private fun updatePieceInRoom(oldPiece:Piece, newPiece:Piece){
+        private fun updatePieceInRoom(oldPiece:Piece, newPiece:Piece):Boolean{
             SessionCurrent.roomGame.players.first {player ->
                 player.color == SessionCurrent.gameState.currentThrow.player.color
             }.let{player ->
                 if(player.pieces.remove(oldPiece)){
                     player.pieces.add(newPiece)
+                    return true
                 }
             }
+            return false
         }
-        fun movPieceToBoard(oldPiece: Piece,currentThrow: CurrentThrow){
-            val mov = if(!currentThrow.checkMovDice.first)currentThrow.dataToDices.first else currentThrow.dataToDices.second
+        fun movPieceToBoard(oldPiece: Piece,currentThrow: CurrentThrow):CurrentThrow{
+            val mov = if(!currentThrow.checkMovDice.first){
+                currentThrow.dataToDices.first
+            } else if(!currentThrow.checkMovDice.second){
+                currentThrow.dataToDices.second
+            } else {
+                Log.e("movPieceToBoard","Movimiento 0")
+                0
+            }
             val oldIndexToBoardCell = if(oldPiece.countStep < 71)UtilGame().calculateIndexBoard(oldPiece) else UtilGame().calculateIndexBoardWinnerZone(oldPiece)
             val newIndexToBoardCell = if(oldPiece.countStep+mov < 71)UtilGame().calculateIndexBoard(oldPiece,mov) else UtilGame().calculateIndexBoardWinnerZone(oldPiece,mov)
 
-            if(!SessionCurrent.gameState.board[oldIndexToBoardCell].pieces.remove(oldPiece)) return
+            if(!SessionCurrent.gameState.board[oldIndexToBoardCell].pieces.remove(oldPiece)) return currentThrow
 
             val newPiece = Piece(
                 oldPiece.color,
                 if(oldPiece.countStep + mov < 71) oldPiece.countStep + mov else UtilGame().calculateCountStepWinnerZone(oldPiece,newIndexToBoardCell),
                 UtilGame().resolvePieceState(newIndexToBoardCell)
             )
+            if(!updatePieceInRoom(oldPiece,newPiece))return currentThrow
             SessionCurrent.gameState.board[newIndexToBoardCell].pieces.add(newPiece)
-            updatePieceInRoom(oldPiece,newPiece)
-
-            SessionCurrent.gameState.currentThrow.checkMovDice = if(!currentThrow.checkMovDice.first)
+            currentThrow.checkMovDice = if(!currentThrow.checkMovDice.first)
                 Pair(true,currentThrow.checkMovDice.second)
             else
                 Pair(currentThrow.checkMovDice.first,true)
-
-            GameStateService().updateGameState()
+            return currentThrow
         }
         private fun updateStateJailToSafe():Piece {
             //Estos cambios son el la Room
-
             // Encuentra al jugador actual
             val currentPlayer = SessionCurrent.roomGame.players.first { player ->
                 player.color == SessionCurrent.gameState.currentThrow.player.color }
@@ -187,10 +207,20 @@ class UtilGame {
             }
         }
         private fun calculateCurrentPlayer(listToPlayers:List<Player>, currentThrow: CurrentThrow): Player {
-            if(currentThrow.dataToDices.first == currentThrow.dataToDices.second) return currentThrow.player
-
-            if (listToPlayers.last() == currentThrow.player) return listToPlayers[0]
-            return listToPlayers[listToPlayers.indexOf(currentThrow.player)+1]
+            var nextPlayer: Player = currentThrow.player
+            if(currentThrow.dataToDices.first == currentThrow.dataToDices.second){
+                return nextPlayer
+            }
+            if (listToPlayers.last().color == currentThrow.player.color) {
+                nextPlayer = listToPlayers.first()
+            }else{
+                val nextPlayerIndex = listToPlayers.indexOfFirst{it.color == currentThrow.player.color
+                } + 1
+                if(listToPlayers[nextPlayerIndex].color != currentThrow.player.color){
+                    nextPlayer = listToPlayers[nextPlayerIndex]
+                }
+            }
+            return nextPlayer
         }
         fun initializationGame(uuid:String):GameState = GameState(
             uuid,
@@ -258,6 +288,10 @@ class UtilGame {
             return listNestedToCells
         }
         fun finishEndShift(currentThrow: CurrentThrow):Boolean{
+            if(currentThrow.dataToDices.first == 0 || currentThrow.dataToDices.second == 0 ){
+                return !shouldEnableReleaseButtonDice(currentThrow)
+            }
+            if(!currentThrow.checkMovDice.first || !currentThrow.checkMovDice.second)return false
             if(!currentThrow.checkThrow)return false
             var buttonMovEnable = false
             currentThrow.player.pieces.forEach{
@@ -266,12 +300,18 @@ class UtilGame {
                     return@forEach
                 }
             }
+
             val buttonJailEnable = shouldEnableReleaseButtonCellJail(currentThrow)
-            val unmovingPiece = currentThrow.player.pieces.firstOrNull{it.state == State.DANGER || it.state == State.SAFE} == null
+            val unmovingPiece = currentThrow.player.pieces.firstOrNull{
+                it.state == State.DANGER || it.state == State.SAFE
+            } == null
+
             // Tengo piezas inmoviles y bonoes de dichas piesas listos para usar, por ende no debo de cambiar de turno
             if(unmovingPiece && buttonJailEnable)return false
+
             // Tengo movimientos
             if(buttonMovEnable) return false
+
             // No pude hacer ningun movimiento entonces retorne true
             currentThrow.checkMovDice = Pair(true,true)
             return true

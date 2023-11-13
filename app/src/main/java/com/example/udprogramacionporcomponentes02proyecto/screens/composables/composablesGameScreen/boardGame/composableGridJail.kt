@@ -46,19 +46,19 @@ import com.google.firebase.database.ValueEventListener
 
 @Composable
 fun GridCellPiecesJail(piece: Piece, width: Dp){
-    var currentThrow by remember {mutableStateOf(SessionCurrent.gameState.currentThrow)}
-    var enable by remember {mutableStateOf(shouldEnableReleaseButtonCellJail(currentThrow))}
-    val updateCurrentThrow:(CurrentThrow?)->Unit = {
-        if (it != null){
-            SessionCurrent.gameState.currentThrow = it
-            currentThrow = SessionCurrent.gameState.currentThrow
-            enable = shouldEnableReleaseButtonCellJail(currentThrow)
-        }
+    var currentThrow by remember {
+        mutableStateOf(SessionCurrent.gameState.currentThrow)
+    }
+    var enable by remember {
+        mutableStateOf(shouldEnableReleaseButtonCellJail(SessionCurrent.gameState.currentThrow))
     }
     val listGameStateValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
-                updateCurrentThrow(GameStateService().convertDataSnapshotToCurrentThrow(dataSnapshot.child("currentThrow")))
+                GameStateService().convertDataSnapshotToCurrentThrow(dataSnapshot.child("currentThrow"))?.let {
+                    currentThrow = it
+                    enable = shouldEnableReleaseButtonCellJail(it)
+                }
             } else {
                 Log.e("Error", "No se pudo convertir dataSnapshot a list<BoadCell>")
             }
@@ -76,7 +76,13 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
         .clickable(
             enabled = enable,
             onClickLabel = "Click me",
-            onClick = {addPieceToBoard(currentThrow)}
+            onClick = {
+                val result = addPieceToBoard(currentThrow)
+                if(result != SessionCurrent.gameState.currentThrow){
+                    SessionCurrent.gameState.currentThrow = result
+                    GameStateService().updateGameState()
+                }
+            }
         )
     ){
         Image(
@@ -90,7 +96,10 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
 @Composable
 fun GridCellJail(listPiece: MutableList<Piece>?, color: ColorP, width: Dp){
     var listMutable = listPiece?.toMutableList()
-    if(listMutable == null)listMutable = mutableListOf()else listMutable.removeAll{it.state!=State.JAIL }
+    if(listMutable == null)
+        listMutable = mutableListOf()
+    else
+        listMutable.removeAll{it.state!=State.JAIL }
     Box(
         modifier = Modifier
             .border(1.dp, Color.Black, RoundedCornerShape(1.dp, 1.dp, 1.dp, 1.dp))

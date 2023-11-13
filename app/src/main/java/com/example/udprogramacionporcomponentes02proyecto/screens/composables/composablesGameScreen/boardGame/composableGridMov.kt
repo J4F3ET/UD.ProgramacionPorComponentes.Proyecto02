@@ -39,6 +39,7 @@ import com.example.udprogramacionporcomponentes02proyecto.model.BoardCell
 import com.example.udprogramacionporcomponentes02proyecto.model.CurrentThrow
 import com.example.udprogramacionporcomponentes02proyecto.model.GameStateService
 import com.example.udprogramacionporcomponentes02proyecto.model.Piece
+import com.example.udprogramacionporcomponentes02proyecto.model.RoomService
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.Numbers
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
@@ -215,18 +216,14 @@ fun CellBoardVerticalMov(width: Dp, height: Dp, orientationCell:String, position
 @Composable
 fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
     var currentThrow by remember {mutableStateOf(SessionCurrent.gameState.currentThrow)}
-    var enable by remember {mutableStateOf(shouldEnableReleaseButtonCellMov(currentThrow,piece))}
-    val updateCurrentThrow:(CurrentThrow?)->Unit = {
-        if (it != null){
-            SessionCurrent.gameState.currentThrow = it
-            currentThrow = SessionCurrent.gameState.currentThrow
-            enable = shouldEnableReleaseButtonCellMov(currentThrow,piece)
-        }
-    }
+    var enable by remember {mutableStateOf(shouldEnableReleaseButtonCellMov(SessionCurrent.gameState.currentThrow,piece))}
     val listGameStateValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {
-                updateCurrentThrow(GameStateService().convertDataSnapshotToCurrentThrow(dataSnapshot.child("currentThrow")))
+                GameStateService().convertDataSnapshotToCurrentThrow(dataSnapshot.child("currentThrow"))?.let{
+                    currentThrow = it
+                    enable = shouldEnableReleaseButtonCellMov(it,piece)
+                }
             } else {
                 Log.e("Error", "No se pudo convertir dataSnapshot a list<BoadCell>")
             }
@@ -252,7 +249,12 @@ fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
             enabled = enable,
             onClickLabel = "Click me",
             onClick = {
-                movPieceToBoard(piece,currentThrow)
+                currentThrow = movPieceToBoard(piece,currentThrow)
+                if(currentThrow != SessionCurrent.gameState.currentThrow){
+                    SessionCurrent.gameState.currentThrow = currentThrow
+                    RoomService().updateRoom(SessionCurrent.roomGame.key,SessionCurrent.roomGame)
+                    GameStateService().updateGameState()
+                }
             }
         )) {
         Image(

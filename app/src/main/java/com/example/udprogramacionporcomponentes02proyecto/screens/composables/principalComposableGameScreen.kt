@@ -22,7 +22,6 @@ fun TopBarGameScreen(){
         title = {},
         actions = { CurrentPlayer()}
     )
-
 }
 @Composable
 fun BottomBarGameScreen(){
