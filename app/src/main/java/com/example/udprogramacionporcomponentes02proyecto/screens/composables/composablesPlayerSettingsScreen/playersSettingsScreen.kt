@@ -114,7 +114,10 @@ fun ListRooms(navController: NavController) {
         userScrollEnabled= true,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        items(rooms.size){if(rooms[it].players.size < 4) ItemRoom(room = rooms[it],navController) }
+        items(rooms.size){
+            if(rooms[it].gameStateKey == "" && rooms[it].players.size < 4)
+                ItemRoom(room = rooms[it],navController)
+        }
     }
 }
 @Composable

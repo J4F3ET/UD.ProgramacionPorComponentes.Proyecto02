@@ -40,19 +40,22 @@ import com.google.firebase.database.ValueEventListener
 @Composable
 fun BottomBarDice(){
     var currentThrow by remember { mutableStateOf(SessionCurrent.gameState.currentThrow) }
+    var enable by remember {mutableStateOf(currentThrow.player == SessionCurrent.localPlayer && !currentThrow.checkThrow)}
     val colorCurrentThrow = mapColorPlayer[currentThrow.player.color]
     val updateDiceGame:() -> Unit= {
-        SessionCurrent.gameState.currentThrow.dataToDices = Pair((1..6).random(), (1..6).random())
-        SessionCurrent.gameState.currentThrow.checkThrow = true
-        currentThrow = SessionCurrent.gameState.currentThrow
+        currentThrow.dataToDices = Pair((1..6).random(), (1..6).random())
+        currentThrow.checkThrow = true
+        SessionCurrent.gameState.currentThrow = currentThrow
         GameStateService().updateGameState()
     }
-    var enable by remember {mutableStateOf(currentThrow.player == SessionCurrent.localPlayer && !currentThrow.checkThrow)}
     val updateCurrentThrow:(CurrentThrow?)->Unit = {
         if (it != null){
-            SessionCurrent.gameState.currentThrow = it
-            currentThrow = SessionCurrent.gameState.currentThrow
+            currentThrow = it
+            SessionCurrent.gameState.currentThrow = currentThrow
             enable = currentThrow.player == SessionCurrent.localPlayer && !currentThrow.checkThrow
+            if(UtilGame.finishEndShift(currentThrow)){
+                UtilGame.endShift(SessionCurrent.gameState)
+            }
         }
     }
     val listGameStateValueEventListener = object : ValueEventListener {

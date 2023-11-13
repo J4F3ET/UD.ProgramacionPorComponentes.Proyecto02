@@ -39,7 +39,6 @@ import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.State
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.addPieceToBoard
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.endShift
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonCellJail
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -77,7 +76,7 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
         .clickable(
             enabled = enable,
             onClickLabel = "Click me",
-            onClick = {addPieceToBoard(piece.color)}
+            onClick = {addPieceToBoard(currentThrow)}
         )
     ){
         Image(
@@ -89,12 +88,9 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
     }
 }
 @Composable
-fun GridCellJail(listPiece: List<Piece>?, color: ColorP, width: Dp){
+fun GridCellJail(listPiece: MutableList<Piece>?, color: ColorP, width: Dp){
     var listMutable = listPiece?.toMutableList()
-    if(listMutable == null)
-        listMutable = mutableListOf()
-    else
-        listMutable.removeAll{it.state!=State.JAIL }
+    if(listMutable == null)listMutable = mutableListOf()else listMutable.removeAll{it.state!=State.JAIL }
     Box(
         modifier = Modifier
             .border(1.dp, Color.Black, RoundedCornerShape(1.dp, 1.dp, 1.dp, 1.dp))

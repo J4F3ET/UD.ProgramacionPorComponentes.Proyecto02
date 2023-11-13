@@ -66,40 +66,15 @@ fun GameScreenContent(){
     //VARIABLE DE STADO POR SECCION
     var roomData by remember { mutableStateOf(SessionCurrent.roomGame.players) }
     var listBoard by remember { mutableStateOf(SessionCurrent.gameState.board) }
-    var list1x1 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.BLUE}?.pieces) }
+    val list1x1 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.BLUE}?.pieces) }
     var list1x2 by remember {mutableStateOf(createNestedListToBoardCell("1x2",listBoard))}
-    var list1x3 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.YELLOW}?.pieces) }
+    val list1x3 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.YELLOW}?.pieces) }
     var list2x1 by remember {mutableStateOf(createNestedListToBoardCell("2x1",listBoard))}
     var list2x3 by remember {mutableStateOf(createNestedListToBoardCell("2x3",listBoard))}
-    var list3x1 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.RED}?.pieces) }
+    val list3x1 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.RED}?.pieces) }
     var list3x2 by remember {mutableStateOf(createNestedListToBoardCell("3x2",listBoard))}
-    var list3x3 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.GREEN}?.pieces) }
+    val list3x3 by remember { mutableStateOf(SessionCurrent.roomGame.players.find{ player ->  player.color == ColorP.GREEN}?.pieces) }
     //AQUI VA LOS CALLBACK
-    //Callbak Cell Jail
-    val litsPiecesInJail:(MutableList<Player>?)-> Unit = { listPlayer ->
-        if(listPlayer != null){
-            val newList1x1 = listPlayer.find { it.color == ColorP.BLUE }?.pieces
-            val newList1x3 = listPlayer.find { it.color == ColorP.YELLOW }?.pieces
-            val newList3x1 = listPlayer.find { it.color == ColorP.RED }?.pieces
-            val newList3x3 = listPlayer.find { it.color == ColorP.GREEN }?.pieces
-            if(list1x1 != newList1x1){
-                list1x1 = newList1x1
-                Log.i("GameScreenContent","Update Section 1x1")
-            }
-            if(list1x3 != newList1x3){
-                list1x3 = newList1x3
-                Log.i("GameScreenContent","Update Section 1X3")
-            }
-            if(list3x1 != newList3x1){
-                list3x1 = newList3x1
-                Log.i("GameScreenContent","Update Section 3X1")
-            }
-            if(list3x3 != newList3x3){
-                list3x3 = newList3x3
-                Log.i("GameScreenContent","Update Section 3x3")
-            }
-        }
-    }
     //Callback CellMov
     val updateListGameState:(MutableList<BoardCell>?)->Unit={
         if(it !=null){
@@ -142,7 +117,6 @@ fun GameScreenContent(){
     }
     RoomService().getDatabaseChild(SessionCurrent.roomGame.key).addValueEventListener(roomValueEventListener)
     //AQUI VA EL LISTENER DE LA BOARD
-
     val listGameStateValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists()) {

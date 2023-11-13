@@ -179,4 +179,4 @@ val mapColorImagePiece = mapOf(
     ColorP.GREEN to R.drawable.piece_green
 )
 
-val Numbers = true
+val Numbers = false

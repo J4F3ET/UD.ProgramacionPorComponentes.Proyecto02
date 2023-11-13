@@ -42,9 +42,7 @@ import com.example.udprogramacionporcomponentes02proyecto.model.Piece
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.Numbers
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.colorCell
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.endShift
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.movPieceToBoard
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonCellMov
 import com.google.firebase.database.DataSnapshot
