@@ -62,6 +62,8 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.7.1")
     implementation("com.google.firebase:firebase-database-ktx:20.2.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     testImplementation("junit:junit:4.13.2")
     testImplementation ("org.mockito:mockito-core:5.6.0")
     testImplementation ("org.mockito.kotlin:mockito-kotlin:4.1.0")

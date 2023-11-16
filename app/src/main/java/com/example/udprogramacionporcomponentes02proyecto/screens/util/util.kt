@@ -148,10 +148,12 @@ val listImagesBackgrounds = listOf(
     R.drawable.bg1,
     R.drawable.bg2,
     R.drawable.bg3,
+    R.drawable.bg4,
     R.drawable.general_blue,
     R.drawable.general_yellow,
     R.drawable.general_red,
     R.drawable.general_green
+
 )
 val mapColorImagePlayer = mapOf(
     ColorP.BLUE to R.drawable.general_blue,
@@ -167,10 +169,10 @@ val mapColorPlayer = mapOf(
     ColorP.NEUTRAL to Color(0.337f, 0.345f, 0.369f, 0.8f)
 )
 val mapColorIndexBackground = mapOf(
-    ColorP.BLUE to 3,
-    ColorP.YELLOW to 4,
-    ColorP.RED to 5,
-    ColorP.GREEN to 6
+    ColorP.BLUE to 4,
+    ColorP.YELLOW to 5,
+    ColorP.RED to 6,
+    ColorP.GREEN to 7
 )
 val mapColorImagePiece = mapOf(
     ColorP.BLUE to R.drawable.piece_blue,

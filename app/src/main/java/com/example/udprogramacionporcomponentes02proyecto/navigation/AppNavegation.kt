@@ -12,5 +12,6 @@ fun AppNavigation(){
         composable(route = AppScreens.IndexScreen.router){ IndexScreen(navController)}
         composable(route = AppScreens.PlayersSettingsScreen.router){PlayersSettingsScreen(navController)}
         composable(route = AppScreens.GameScreen.router){GameScreen(navController)}
+        composable(route = AppScreens.WaitingScreen.router){ WaitingScreen(navController)}
     }
 }

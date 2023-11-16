@@ -33,6 +33,9 @@ import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun DialogFindRoom(navController: NavController, onDismiss: () -> Unit){
@@ -106,7 +109,7 @@ fun DialogWaitGame(navController: NavController, room: Room, onDismiss: () -> Un
     val findGameState:(GameState?)-> Unit = { gameState ->
         if(gameState != null){
             SessionCurrent.gameState = gameState
-            navController.navigate(route = AppScreens.GameScreen.router)
+            navController.navigate(route = AppScreens.WaitingScreen.router)
         }
     }
     val roomValueEventListener = object : ValueEventListener {
