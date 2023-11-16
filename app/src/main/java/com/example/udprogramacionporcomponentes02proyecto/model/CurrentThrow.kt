@@ -14,4 +14,25 @@ data class CurrentThrow(
         result["dataToDices"] = this.dataToDices
         return result
     }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CurrentThrow
+
+        if (player != other.player) return false
+        if (checkThrow != other.checkThrow) return false
+        if (checkMovDice != other.checkMovDice) return false
+        if (dataToDices != other.dataToDices) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = player.hashCode()
+        result = 31 * result + checkThrow.hashCode()
+        result = 31 * result + checkMovDice.hashCode()
+        result = 31 * result + dataToDices.hashCode()
+        return result
+    }
 }

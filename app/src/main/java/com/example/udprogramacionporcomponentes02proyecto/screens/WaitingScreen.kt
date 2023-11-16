@@ -32,12 +32,8 @@ import kotlinx.coroutines.launch
 fun WaitingScreen(navController: NavController){
     val loadGame: ()-> Unit = {
         CoroutineScope(Dispatchers.IO).launch {
-            // Ejemplo: delay(2000) // Simula una espera de 2 segundos
-            // Espera 2 segundos antes de actualizar el estado y navegar
             delay(2000)
-            // Actualiza el estado del juego en el hilo principal
             CoroutineScope(Dispatchers.Main).launch {
-                // Navega a la siguiente pantalla en Compose
                 navController.navigate(route = AppScreens.GameScreen.router)
             }
         }

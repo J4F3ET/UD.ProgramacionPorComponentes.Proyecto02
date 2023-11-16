@@ -23,9 +23,9 @@ class GameStateService {
         database.child(gameState.key).setValue(gameState)
         return gameState
     }
-    fun updateGameState(){
-        val gameStateMap = SessionCurrent.gameState.toMap()
-        database.child(SessionCurrent.gameState.key).updateChildren(gameStateMap)
+    fun updateGameState(key: String,gameState: GameState){
+        val gameStateMap = gameState.toMap()
+        database.child(key).updateChildren(gameStateMap)
     }
     private fun findGameState(key: String, callback: (GameState?) -> Unit) {
         val gameStateRef = database.child(key)

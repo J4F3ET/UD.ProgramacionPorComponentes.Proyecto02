@@ -78,9 +78,12 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
             onClickLabel = "Click me",
             onClick = {
                 val result = addPieceToBoard(currentThrow)
-                if(result != SessionCurrent.gameState.currentThrow){
+                if(
+                    result.checkMovDice.first != SessionCurrent.gameState.currentThrow.checkMovDice.first ||
+                    result.checkMovDice.second != SessionCurrent.gameState.currentThrow.checkMovDice.second
+                ){
                     SessionCurrent.gameState.currentThrow = result
-                    GameStateService().updateGameState()
+                    GameStateService().updateGameState(SessionCurrent.gameState.key,SessionCurrent.gameState)
                 }
             }
         )

@@ -33,7 +33,6 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorP
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.textStylePixel
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
-import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.resolveUpdateDiceToGameState
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonDice
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -52,12 +51,16 @@ fun BottomBarDice(){
     val colorCurrentThrow = mapColorPlayer[currentThrow.player.color]
 
     val updateDiceGame:() -> Unit= {
-        currentThrow.checkThrow = true
-        currentThrow.dataToDices = Pair((1..6).random(), (1..6).random())
-        if(resolveUpdateDiceToGameState(currentThrow)) {
-            SessionCurrent.gameState.currentThrow = currentThrow
-            GameStateService().updateGameState()
-        }
+        SessionCurrent.gameState.currentThrow = CurrentThrow(
+            SessionCurrent.localPlayer,
+            true,
+            Pair(false,false),
+            Pair(
+                (1..6).random(),
+                (1..6).random()
+            )
+        )
+        GameStateService().updateGameState(SessionCurrent.gameState.key,SessionCurrent.gameState)
     }
     val updateCurrentThrow:(CurrentThrow?)->Unit = {
         if (it != null){

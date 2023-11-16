@@ -69,26 +69,27 @@ class UtilGame {
     }
     companion object{
         private fun updateCheckReleasePieceDice(currentThrow: CurrentThrow):CurrentThrow{
-            if(!(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) && currentThrow.dataToDices.first + currentThrow.dataToDices.second in 5..6){
-                currentThrow.checkMovDice = Pair(true,true)
+            //Si el primer movimiento no se a efectuado y es un 5 o 6
+            if(!currentThrow.checkMovDice.first && currentThrow.dataToDices.first in 5..6){
+                currentThrow.checkMovDice = Pair(true,currentThrow.checkMovDice.second)
+            // Si el segundo movimiento no se a efectuado pero esta entre el 5 o 6
+            }else if(!currentThrow.checkMovDice.second && currentThrow.dataToDices.second in 5..6){
+                currentThrow.checkMovDice = Pair(currentThrow.checkMovDice.first,true)
             }else{
-                //Si el primer movimiento ya se efectuo y el segundo esta en 5..6 quiere dercir que el segundo es true
-                if(currentThrow.dataToDices.second in 5..6){
-                    currentThrow.checkMovDice = Pair(currentThrow.checkMovDice.first,true)
-                }else{
-                    currentThrow.checkMovDice = Pair(true,currentThrow.checkMovDice.second)
-                }
+            // Si se llego a esta funcion es por que es alguno de los anteriores casos, por ende el
+            // ultimo caso es que la suma de los dados sea 5 o 6, por ende consume los dos movimientos
+                currentThrow.checkMovDice = Pair(true,true)
             }
             return  currentThrow
         }
         fun shouldEnableReleaseButtonCellMov(currentThrow: CurrentThrow,piece:Piece):Boolean{
-            //Verifica que se alla lanzado los dados
+            //Si el jugador actual no es el jugador local entonces, no habilita el movimiento de las fichas
+            if(currentThrow.player.color != SessionCurrent.localPlayer.color) return false
+            //Si el jugador tiro los dados no entra al condicional
             if(!currentThrow.checkThrow)return false
-            //Verifica que el jugador sea el autorizado correr ficha
-            if(currentThrow.player != SessionCurrent.localPlayer) return false
-            //Verificar el uso de los lanzamientos
+            //Si alguno de los lanzamiento no se a usado, no entra al condicional
             if(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) return false
-            //Verifica estados de la pieza
+            //Si el estado de la pieza es JAIL o WINNER
             if(piece.state == State.JAIL || piece.state == State.WINNER) return false
 
             return true
@@ -97,17 +98,18 @@ class UtilGame {
             //RULE2("Comienzas el juego en la base y debes sacar un 5 para mover una ficha a la casilla de inicio."),
             //RULE5("Si sacas un 6, puedes sacar una ficha de la base o mover una ficha 6 casillas."),
 
-            // Verifica que si el dado uno se uso y cumple con el 5 y 6
+            // Si el dado 1 no se a usado y esta entre 5 y 6
             if(!currentThrow.checkMovDice.first && (currentThrow.dataToDices.first in 5..6))
                 return true
-            // Verifica que si el dado dos se uso y cumple con el 5 y 6
+            // Si el dado 2 no se a usado y esta entre 5 y 6
             if(!currentThrow.checkMovDice.second && (currentThrow.dataToDices.second in 5..6))
                 return true
-            // La suma da 5 o 6 y no se han usado los lazamientos(2)
+            // Si la suma da 5 o 6 y no se han usado los lazamientos(2)
             if(
                 !(currentThrow.checkMovDice.first && currentThrow.checkMovDice.second) &&
                 currentThrow.dataToDices.first+currentThrow.dataToDices.second  in 5..6
                 ) return true
+
             return false
         }
         fun shouldEnableReleaseButtonDice(currentThrow: CurrentThrow):Boolean{
@@ -116,24 +118,11 @@ class UtilGame {
                 //Si no ha oprimido el boton
                 if(!currentThrow.checkThrow){
                     //Si algunod e los dados esta en 0
-                    if((currentThrow.dataToDices.first == 0 || currentThrow.dataToDices.second == 0)&& !currentThrow.checkMovDice.first&& !currentThrow.checkMovDice.first){
-                        return true
-                    }
+                    return true
                 }
             }
             return false
 
-        }
-        fun resolveUpdateDiceToGameState(currentThrow:CurrentThrow):Boolean{
-            if(
-                !currentThrow.checkMovDice.first && //Si no se registra movimiento 1
-                !currentThrow.checkMovDice.second &&//Si no se registra movimiento 2
-                currentThrow.dataToDices.first != 0 && // Si el dado uno es diferente a 0
-                currentThrow.dataToDices.second != 0 // Si el dado dos es diferente a 0
-            ){
-                return true
-            }
-            return false
         }
         fun endShift(gameState: GameState){
             if(!gameState.currentThrow.checkMovDice.first || !gameState.currentThrow.checkMovDice.second) return
@@ -143,8 +132,7 @@ class UtilGame {
             gameState.currentThrow = CurrentThrow(
                 calculateCurrentPlayer(SessionCurrent.roomGame.players,gameState.currentThrow)
             )
-            SessionCurrent.gameState = gameState
-            GameStateService().updateGameState()
+            GameStateService().updateGameState(gameState.key,gameState)
         }
         fun addPieceToBoard(currentThrow:CurrentThrow):CurrentThrow{
             //Funcion solo es posible sis e habilita la salida de celdas de la carcel

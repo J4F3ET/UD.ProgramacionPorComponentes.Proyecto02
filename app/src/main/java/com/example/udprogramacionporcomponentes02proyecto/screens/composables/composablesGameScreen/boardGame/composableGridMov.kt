@@ -250,10 +250,13 @@ fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
             onClickLabel = "Click me",
             onClick = {
                 currentThrow = movPieceToBoard(piece,currentThrow)
-                if(currentThrow != SessionCurrent.gameState.currentThrow){
+                if(
+                    currentThrow.checkMovDice.first != SessionCurrent.gameState.currentThrow.checkMovDice.first ||
+                    currentThrow.checkMovDice.second != SessionCurrent.gameState.currentThrow.checkMovDice.second
+                ){
                     SessionCurrent.gameState.currentThrow = currentThrow
                     RoomService().updateRoom(SessionCurrent.roomGame.key,SessionCurrent.roomGame)
-                    GameStateService().updateGameState()
+                    GameStateService().updateGameState(SessionCurrent.gameState.key,SessionCurrent.gameState)
                 }
             }
         )) {
