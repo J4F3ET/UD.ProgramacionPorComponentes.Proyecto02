@@ -49,7 +49,6 @@ fun BottomBarDice(){
         )
     }
     val colorCurrentThrow = mapColorPlayer[currentThrow.player.color]
-
     val updateDiceGame:() -> Unit= {
         SessionCurrent.gameState.currentThrow = CurrentThrow(
             SessionCurrent.localPlayer,
@@ -61,15 +60,15 @@ fun BottomBarDice(){
             )
         )
         GameStateService().updateGameState(SessionCurrent.gameState.key,SessionCurrent.gameState)
+        if(UtilGame.finishEndShift(SessionCurrent.gameState.currentThrow)){
+            UtilGame.endShift(SessionCurrent.roomGame,SessionCurrent.gameState)
+        }
     }
     val updateCurrentThrow:(CurrentThrow?)->Unit = {
         if (it != null){
+            enable = shouldEnableReleaseButtonDice(it)
             currentThrow = it
             SessionCurrent.gameState.currentThrow = it
-            enable = shouldEnableReleaseButtonDice(it)
-            if(UtilGame.finishEndShift(it)){
-                UtilGame.endShift(SessionCurrent.gameState)
-            }
         }
     }
     val listGameStateValueEventListener = object : ValueEventListener {

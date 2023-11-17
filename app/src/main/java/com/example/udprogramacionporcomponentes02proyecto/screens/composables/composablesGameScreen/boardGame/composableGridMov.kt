@@ -44,6 +44,7 @@ import com.example.udprogramacionporcomponentes02proyecto.screens.util.Numbers
 import com.example.udprogramacionporcomponentes02proyecto.screens.util.mapColorImagePiece
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.colorCell
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.endShift
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.movPieceToBoard
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonCellMov
 import com.google.firebase.database.DataSnapshot
@@ -249,15 +250,18 @@ fun GridCellPieces(piece: Piece, width: Dp, height: Dp, orientation:String){
             enabled = enable,
             onClickLabel = "Click me",
             onClick = {
-                currentThrow = movPieceToBoard(piece,currentThrow)
-                if(
-                    currentThrow.checkMovDice.first != SessionCurrent.gameState.currentThrow.checkMovDice.first ||
-                    currentThrow.checkMovDice.second != SessionCurrent.gameState.currentThrow.checkMovDice.second
-                ){
-                    SessionCurrent.gameState.currentThrow = currentThrow
-                    RoomService().updateRoom(SessionCurrent.roomGame.key,SessionCurrent.roomGame)
-                    GameStateService().updateGameState(SessionCurrent.gameState.key,SessionCurrent.gameState)
+                val result = movPieceToBoard(
+                        piece,
+                        SessionCurrent.roomGame,
+                        SessionCurrent.gameState
+                    )?: return@clickable
+                RoomService().updateRoom(result.first.key,result.first)
+                if(result.second.currentThrow.checkMovDice.first && result.second.currentThrow.checkMovDice.second){
+                    endShift(result.first,result.second)
+                }else{
+                    GameStateService().updateGameState(result.second.key,result.second)
                 }
+
             }
         )) {
         Image(

@@ -117,43 +117,70 @@ class UtilGame {
             if(currentThrow.player == SessionCurrent.localPlayer){
                 //Si no ha oprimido el boton
                 if(!currentThrow.checkThrow){
-                    //Si algunod e los dados esta en 0
                     return true
                 }
             }
             return false
 
         }
-        fun endShift(gameState: GameState){
+        fun endShift(room: Room,gameState: GameState){
             if(!gameState.currentThrow.checkMovDice.first || !gameState.currentThrow.checkMovDice.second) return
             gameState.board.forEach{
                 UtilGame().verifyCellEliminatePiece(it)
             }
             gameState.currentThrow = CurrentThrow(
-                calculateCurrentPlayer(SessionCurrent.roomGame.players,gameState.currentThrow)
+                calculateCurrentPlayer(room.players,gameState.currentThrow)
             )
             GameStateService().updateGameState(gameState.key,gameState)
         }
         fun addPieceToBoard(currentThrow:CurrentThrow):CurrentThrow{
             //Funcion solo es posible sis e habilita la salida de celdas de la carcel
             //shouldEnableReleaseButtonCellJail
-            val newPiece = updateStateJailToSafe()
-            val indexNewPieceToBoard = UtilGame().calculateIndexBoard(newPiece)
-            SessionCurrent.gameState.board[indexNewPieceToBoard].pieces.add(newPiece)
-            return updateCheckReleasePieceDice(currentThrow)
+            val result = updateStateJailToSafe(currentThrow)
+            val indexNewPieceToBoard = UtilGame().calculateIndexBoard(result.first)
+            SessionCurrent.gameState.board[indexNewPieceToBoard].pieces.add(result.first)
+            SessionCurrent.roomGame = updatePieceStateInRoom(result.second,SessionCurrent.roomGame)
+            SessionCurrent.gameState.currentThrow = updateCheckReleasePieceDice(result.second)
+            RoomService().updateRoom(SessionCurrent.roomGame.key,SessionCurrent.roomGame)
+            GameStateService().updateGameState(SessionCurrent.gameState.key,SessionCurrent.gameState)
+            return SessionCurrent.gameState.currentThrow
         }
-        private fun updatePieceInRoom(oldPiece:Piece, newPiece:Piece):Boolean{
-            SessionCurrent.roomGame.players.first {player ->
-                player.color == SessionCurrent.gameState.currentThrow.player.color
-            }.let{player ->
-                if(player.pieces.remove(oldPiece)){
-                    player.pieces.add(newPiece)
-                    return true
+        private fun updatePieceStateInRoom(currentThrow: CurrentThrow, room: Room):Room{
+            val index = room.players.first{
+                it.color == currentThrow.player.color
+            }.let { room.players.indexOf(it) }
+
+            room.players.removeAt(index)
+            room.players.add(index,currentThrow.player)
+            return room
+        }
+        private fun updatePieceInRoom(oldPiece:Piece, newPiece:Piece,players:MutableList<Player>):MutableList<Player>{
+            var index = 0
+            players.first {
+                it.color == SessionCurrent.localPlayer.color
+            }.let {
+                index  = players.indexOf(it)
+            }
+            val newPlayer = updatePieceInPlayer(oldPiece,newPiece, players[index])
+            players.removeAt(index)
+            players.add(index,newPlayer)
+            return players
+        }
+        private fun updatePieceInPlayer(oldPiece:Piece, newPiece:Piece,player:Player):Player{
+            //La primera pieza que concuerde con el CountStep de la pieza vieja sera la remplazada
+            player.pieces.first {
+                it.countStep == oldPiece.countStep
+            }.let {
+                if(it.countStep == oldPiece.countStep){
+                    it.state = newPiece.state
+                    it.countStep = newPiece.countStep
                 }
             }
-            return false
+            return player
         }
-        fun movPieceToBoard(oldPiece: Piece,currentThrow: CurrentThrow):CurrentThrow{
+        fun movPieceToBoard(oldPiece: Piece,room: Room,gameState:GameState):Pair<Room,GameState>?{
+            val currentThrow = gameState.currentThrow
+            //Movimiento del dado
             val mov = if(!currentThrow.checkMovDice.first){
                 currentThrow.dataToDices.first
             } else if(!currentThrow.checkMovDice.second){
@@ -162,37 +189,46 @@ class UtilGame {
                 Log.e("movPieceToBoard","Movimiento 0")
                 0
             }
+            //Index viejo de la pieza en la board
             val oldIndexToBoardCell = if(oldPiece.countStep < 71)UtilGame().calculateIndexBoard(oldPiece) else UtilGame().calculateIndexBoardWinnerZone(oldPiece)
+            //Index nuevo de la pieza en la board
             val newIndexToBoardCell = if(oldPiece.countStep+mov < 71)UtilGame().calculateIndexBoard(oldPiece,mov) else UtilGame().calculateIndexBoardWinnerZone(oldPiece,mov)
 
-            if(!SessionCurrent.gameState.board[oldIndexToBoardCell].pieces.remove(oldPiece)) return currentThrow
+            //Si falla el remover el item de la board, no guarda hace cambios en el turno
+            if(!gameState.board[oldIndexToBoardCell].pieces.remove(oldPiece)) return null
 
             val newPiece = Piece(
                 oldPiece.color,
                 if(oldPiece.countStep + mov < 71) oldPiece.countStep + mov else UtilGame().calculateCountStepWinnerZone(oldPiece,newIndexToBoardCell),
                 UtilGame().resolvePieceState(newIndexToBoardCell)
             )
-            if(!updatePieceInRoom(oldPiece,newPiece))return currentThrow
-            SessionCurrent.gameState.board[newIndexToBoardCell].pieces.add(newPiece)
+
+            // Limpiando players de la sala, para remplazarlos con los cambios
+            room.players = updatePieceInRoom(oldPiece,newPiece,room.players)
+
+            // Agregando pieza al nuevo index
+            gameState.board[newIndexToBoardCell].pieces.add(newPiece)
+
+            //Actualizando los datos del turno
             currentThrow.checkMovDice = if(!currentThrow.checkMovDice.first)
                 Pair(true,currentThrow.checkMovDice.second)
             else
                 Pair(currentThrow.checkMovDice.first,true)
-            return currentThrow
+
+            gameState.currentThrow = currentThrow
+            SessionCurrent.gameState =gameState
+            SessionCurrent.roomGame = room
+            return Pair(room,gameState)
         }
-        private fun updateStateJailToSafe():Piece {
+        private fun updateStateJailToSafe(currentThrow: CurrentThrow):Pair<Piece,CurrentThrow> {
             //Estos cambios son el la Room
             // Encuentra al jugador actual
-            val currentPlayer = SessionCurrent.roomGame.players.first { player ->
-                player.color == SessionCurrent.gameState.currentThrow.player.color }
-            // Si el jugador actual existe, actualiza el estado de la pieza
-            currentPlayer.let { player ->
-                player.pieces.first { pieceFind -> pieceFind.state == State.JAIL }.let {
+            var piece = Piece(currentThrow.player.color,0,State.SAFE)
+            currentThrow.player.pieces.first{ pieceFind -> pieceFind.state == State.JAIL }.let{
                     it.countStep = 0
                     it.state = State.SAFE
-                    return it
                 }
-            }
+            return Pair(piece,currentThrow)
         }
         private fun calculateCurrentPlayer(listToPlayers:List<Player>, currentThrow: CurrentThrow): Player {
             var nextPlayer: Player = currentThrow.player
@@ -200,7 +236,7 @@ class UtilGame {
                 return nextPlayer
             }
             if (listToPlayers.last().color == currentThrow.player.color) {
-                nextPlayer = listToPlayers.first()
+                nextPlayer = listToPlayers[0]
             }else{
                 val nextPlayerIndex = listToPlayers.indexOfFirst{it.color == currentThrow.player.color
                 } + 1
@@ -276,11 +312,6 @@ class UtilGame {
             return listNestedToCells
         }
         fun finishEndShift(currentThrow: CurrentThrow):Boolean{
-            if(currentThrow.dataToDices.first == 0 || currentThrow.dataToDices.second == 0 ){
-                return !shouldEnableReleaseButtonDice(currentThrow)
-            }
-            if(!currentThrow.checkMovDice.first || !currentThrow.checkMovDice.second)return false
-            if(!currentThrow.checkThrow)return false
             var buttonMovEnable = false
             currentThrow.player.pieces.forEach{
                 if(shouldEnableReleaseButtonCellMov(currentThrow,it) ){
@@ -288,18 +319,8 @@ class UtilGame {
                     return@forEach
                 }
             }
-
-            val buttonJailEnable = shouldEnableReleaseButtonCellJail(currentThrow)
-            val unmovingPiece = currentThrow.player.pieces.firstOrNull{
-                it.state == State.DANGER || it.state == State.SAFE
-            } == null
-
-            // Tengo piezas inmoviles y bonoes de dichas piesas listos para usar, por ende no debo de cambiar de turno
-            if(unmovingPiece && buttonJailEnable)return false
-
-            // Tengo movimientos
             if(buttonMovEnable) return false
-
+            if(shouldEnableReleaseButtonCellJail(currentThrow))return false
             // No pude hacer ningun movimiento entonces retorne true
             currentThrow.checkMovDice = Pair(true,true)
             return true

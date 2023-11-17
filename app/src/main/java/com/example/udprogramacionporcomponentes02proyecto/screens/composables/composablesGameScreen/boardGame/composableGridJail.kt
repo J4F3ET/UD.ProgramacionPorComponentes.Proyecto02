@@ -38,6 +38,7 @@ import com.example.udprogramacionporcomponentes02proyecto.ui.theme.BackGrounds
 import com.example.udprogramacionporcomponentes02proyecto.util.ColorP
 import com.example.udprogramacionporcomponentes02proyecto.util.SessionCurrent
 import com.example.udprogramacionporcomponentes02proyecto.util.State
+import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.addPieceToBoard
 import com.example.udprogramacionporcomponentes02proyecto.util.UtilGame.Companion.shouldEnableReleaseButtonCellJail
 import com.google.firebase.database.DataSnapshot
@@ -78,13 +79,8 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
             onClickLabel = "Click me",
             onClick = {
                 val result = addPieceToBoard(currentThrow)
-                if(
-                    result.checkMovDice.first != SessionCurrent.gameState.currentThrow.checkMovDice.first ||
-                    result.checkMovDice.second != SessionCurrent.gameState.currentThrow.checkMovDice.second
-                ){
-                    SessionCurrent.gameState.currentThrow = result
-                    GameStateService().updateGameState(SessionCurrent.gameState.key,SessionCurrent.gameState)
-                }
+                if(result.checkMovDice.first && result.checkMovDice.second)
+                    UtilGame.endShift(SessionCurrent.roomGame,SessionCurrent.gameState)
             }
         )
     ){
