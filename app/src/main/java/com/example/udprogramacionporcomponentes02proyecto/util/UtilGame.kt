@@ -114,14 +114,13 @@ class UtilGame {
         }
         fun shouldEnableReleaseButtonDice(currentThrow: CurrentThrow):Boolean{
             //Si el jugador es el correcto
-            if(currentThrow.player == SessionCurrent.localPlayer){
+            if(currentThrow.player.color == SessionCurrent.localPlayer.color){
                 //Si no ha oprimido el boton
                 if(!currentThrow.checkThrow){
                     return true
                 }
             }
             return false
-
         }
         fun endShift(room: Room,gameState: GameState){
             if(!gameState.currentThrow.checkMovDice.first || !gameState.currentThrow.checkMovDice.second) return

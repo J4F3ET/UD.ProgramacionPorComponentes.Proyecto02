@@ -94,11 +94,9 @@ fun GridCellPiecesJail(piece: Piece, width: Dp){
 }
 @Composable
 fun GridCellJail(listPiece: MutableList<Piece>?, color: ColorP, width: Dp){
-    var listMutable = listPiece?.toMutableList()
+    var listMutable = listPiece?.filter { it.state == State.JAIL }
     if(listMutable == null)
         listMutable = mutableListOf()
-    else
-        listMutable.removeAll{it.state!=State.JAIL }
     Box(
         modifier = Modifier
             .border(1.dp, Color.Black, RoundedCornerShape(1.dp, 1.dp, 1.dp, 1.dp))
